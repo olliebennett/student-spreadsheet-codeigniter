@@ -50,9 +50,6 @@ $active_record = TRUE;
 
 $db['default']['hostname'] = '127.0.0.1:3307';
 
-// $db['default']['username'] = 'everythi_stspci';
-// $db['default']['password'] = 'rTeDNe4)hTtR';
-// $db['default']['database'] = 'everythi_stsp_ci01';
 $db['default']['username'] = 'root';
 $db['default']['password'] = '';
 $db['default']['database'] = 'codeigniterstsp';
