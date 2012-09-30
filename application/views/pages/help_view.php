@@ -1,0 +1,1 @@
+this is inside the help_view.php file.

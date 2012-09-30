@@ -1,0 +1,1 @@
+this is inside the view_purchase_view.php file.<?php		print_r($purchase);

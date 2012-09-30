@@ -1,4 +1,4 @@
-student-spreadsheet
-===================
-
 The Student Spreadsheet
+=======================
+
+<http://studentspreadsheet.com>

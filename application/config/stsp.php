@@ -1,0 +1,2 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');// Student Spreadsheet Settings// Version
+$config['stsp_version'] = '4.0';// BETA$config['stsp_beta'] = TRUE;// DEMO$config['stsp_demo'] = FALSE;
