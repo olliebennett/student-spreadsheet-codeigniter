@@ -168,3 +168,7 @@ pip-log.txt
 ####################
 
 application/logs/log-*.php
+
+# Config Files
+application/config/Facebook.php
+application/config/database.php
