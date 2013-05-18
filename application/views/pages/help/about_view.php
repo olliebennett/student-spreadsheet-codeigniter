@@ -1,10 +1,6 @@
-<h3>About Student Spreadsheet</h3>
+<p>Built by <a href="http://olliebennett.co.uk/">Ollie Bennett</a>.</p>
 
-by Ollie Bennett
-
-<hr />
-
-Tools Used:
+<h3>Tools Used</h3>
 
 <ul>
   <li>Twitter Bootstrap</li>

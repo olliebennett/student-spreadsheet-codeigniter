@@ -1,1 +1,1 @@
-this is inside the privacy_view.php file.
+<p>I'll try to be nice with your data. If you have any questions, <a href="<?php echo site_url('help/contact'); ?>">ask me</a>!</p>
