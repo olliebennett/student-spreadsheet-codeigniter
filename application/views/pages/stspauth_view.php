@@ -1,2 +1,0 @@
-this is inside the home_view.php file.
-<?php echo anchor($this->facebook->getLoginURL($this->config->item('facebook_login_parameters')), 'Connect with Facebook', 'id=connect_button class=bambambam'); ?>

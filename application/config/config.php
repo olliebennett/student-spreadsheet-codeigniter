@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://offlinestsp.com/';
+$config['base_url']	= 'http://offline-studentspreadsheet-codeigniter.com/';
 // $config['base_url']	= 'http://192.168.1.65/';
 // $config['base_url']	= 'http://studentspreadsheet.com/version/ci-0-2/';
 
@@ -28,7 +28,7 @@ $config['base_url']	= 'http://offlinestsp.com/';
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -247,7 +247,7 @@ $config['encryption_key'] = 'JP6386£TH03t-G5OK7W%78392)*H45';
 | 'sess_time_to_update'		= how many seconds between CI refreshing Session Information
 |
 */
-$config['sess_cookie_name']		= 'stsp_session';
+$config['sess_cookie_name']		= 'stspsession'; // alphanumeric for compatibility with IE?
 $config['sess_expiration']		= 7200;
 $config['sess_expire_on_close']	= FALSE;
 $config['sess_encrypt_cookie']	= TRUE;
@@ -296,10 +296,10 @@ $config['global_xss_filtering'] = FALSE;
 | 'csrf_cookie_name' = The cookie name
 | 'csrf_expire' = The number in seconds the token should expire.
 */
-$config['csrf_protection'] = FALSE;
-$config['csrf_token_name'] = 'csrf_test_name';
-$config['csrf_cookie_name'] = 'csrf_cookie_name';
-$config['csrf_expire'] = 7200;
+$config['csrf_protection'] = TRUE;
+$config['csrf_token_name'] = 'stsp_csrf_token';
+$config['csrf_cookie_name'] = 'stsp_csrf_cookie';
+$config['csrf_expire'] = 43200; // 12 hours (default = 2 hrs)
 
 /*
 |--------------------------------------------------------------------------
@@ -331,7 +331,7 @@ $config['compress_output'] = FALSE;
 | regarding date handling.
 |
 */
-$config['time_reference'] = 'local';
+$config['time_reference'] = 'gmt';
 
 
 /*
@@ -344,7 +344,7 @@ $config['time_reference'] = 'local';
 | in your view files.  Options are TRUE or FALSE (boolean)
 |
 */
-$config['rewrite_short_tags'] = FALSE;
+$config['rewrite_short_tags'] = false;
 
 
 /*

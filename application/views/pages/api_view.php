@@ -1,0 +1,1 @@
+<p>If you want to use this API, <a href="<?php echo site_url('help/contact'); ?>">get in touch</a>.</p><p>If there's interest, I will open it up, and might even write some documentation someday!</p>

@@ -1,0 +1,1 @@
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');class Api extends CI_Controller {		// Constructor	function __construct() {				parent::__construct();						}	// Index	function index() {		// Send to view		$data['title'] = 'API Docs';		$this->load->view('template', $data);			}}// EOF

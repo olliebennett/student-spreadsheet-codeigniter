@@ -1,16 +1,32 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /* Display variable */
-function d($d,$name = null){
-	echo '<pre>';
-	if ($name != null) echo $name.": ";
-	else echo "Unknown Variable: ";
+function d($d,$name = 'Unspecified Variable'){
+	echo "<code>$name :</code><br /><br />";
 	var_dump($d);
-	echo '</pre>';
 }
 
+function filterCsv($str) {
+	return str_replace(',', '_', $str);
+}
+
+function filterXml($str) {
+	return str_replace('<', '&lt;', str_replace('>', '$gt;', $str));
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // not used after all that!
-function d_profiler($d,$name = 'Unknown Variable') {
+function UNUSEDd_profiler($d, $name = 'Unspecified Variable') {
 	
 	$slug = str_replace(' ','_',trim(str_replace(array('$',':','-'),' ',strtolower($name))));
 	
@@ -37,8 +53,30 @@ echo '
 
 }
 
-/* Currency Code to ASCII */
-/* Converts currency codes (GBP) to ASCII (&#163;). */
+/**
+ * Render Price
+ * - Ignore any small variations from 0.
+ * - Display "-" sign if negative (but don't bother with "+" sign)
+ * - Wrap units and decimals in ".pounds" and ".price" span tags respectively, for styling. * 
+ */
+function render_price($val, $cur = '&#163;')
+{
+	
+  if (!is_numeric($val)) {
+    return 'NaN';
+  }
+
+  $pounds = intval(abs($val));
+  $pence = substr(round(abs($val)*100%100) . '00', 0, 2);
+
+  return ((abs($val) < 0.005) ? '' : ($val < 0 ? '-' : '<!--+-->')) . '&nbsp;' . $cur . '&nbsp;' . '<span class="price_pounds">' . $pounds . '</span>.<span class="price_pence">' . $pence . '</span>';
+
+}
+
+/**
+ * Currency Code to ASCII
+ * - Converts currency codes (GBP) to ASCII (&#163;).
+ */
 function cur_code_to_ascii($currency_code)
 {
 	if ($currency_code == 'GBP') return '&#163;';
@@ -48,10 +86,42 @@ function cur_code_to_ascii($currency_code)
 	else return '[ERROR]';
 }
 
+/**
+ * Render Help Tip
+ * - build html for pop-over help tips.
+ */
+function helptip($str, $href='#') {
+	return '<a href="' . $href . '" class="helptip" data-toggle="tooltip" title="' . $str . '"><i class="icon-question-sign"></i></a>';
+}
+
+/**
+ * Validate (UK) Mobile Phone Number
+ * - Returns number as 12 digits, in "447#########" format, or "0" if invalid number.
+ */
+function validate_mobile($num)
+{
+	
+    $num = preg_replace("/[^0-9]/", "", $num); // Strip non-numbers
+
+	if ((substr($num, 0, 3) == '447') && (strlen($num) == 12)) { // 447#########
+		// return number as-is
+		return $num; 
+	}
+	elseif ((substr($num,0,2) == '07') && (strlen($num) == 11)) { // 07#########
+		// replace "07" with "447".
+		return '447'.substr($num,2,11);
+	} else {
+		return FALSE;
+	}
+}
+
+
+
+
 /* Display Time Ago */
 // $time = time in the past that we're comparing with.
 // $gran = Granularity - detail to which time_ago is given.
-function time_ago($time,$gran=2) {
+function UNUSEDtime_ago($time,$gran=2) {
 	
 		// Convert to unix time if needed (ie if YYYY-MM-DD HH-SS format is provided instead)
 		if (!is_int($time)) $time = strtotime($time);
@@ -83,38 +153,5 @@ function time_ago($time,$gran=2) {
 		}
 		return $str.' ago';      
 }
-	
-/* Validate (UK?) Mobile Phone Number */
-// Returns number as 12 digits, in "447#########" format, or "0" if invalid number.
-function validate_mobile($num)
-{
-	// Strip Whitespace
-	$num = str_replace(' ','',$num);
-	// Check validity
-	if (!ctype_digit(substr($num,-1,9))) // last 9 are not digits
-	{
-		$num = '0';
-	}
-	elseif ((substr($num,0,4) == '+447') && (strlen($num) == 13)) // +447#########
-	{
-		// cut off initial "+"
-		$num = substr($num,1,13);
-	}
-	elseif ((substr($num,0,3) == '447') && (strlen($num) == 12)) // 447#########
-	{
-		$num = $num; // return number as-is
-	}
-	elseif ((substr($num,0,2) == '07') && (strlen($num) == 11)) // 07#########
-	{
-		// replace "07" with "447".
-		$num = '447'.substr($num,2,11);
-	}
-	else
-	{
-		$num = '0';
-	}
-	return $num;
-}
-
 
 // EOF

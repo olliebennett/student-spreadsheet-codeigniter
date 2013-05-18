@@ -67,39 +67,43 @@ a.nav_current {
     border-color: gray;
 }
 a.nav_add {
-    background: url(../img/fatcow16/add.png) 13px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/add.png) 13px 7px no-repeat #f3f3f3;
     width: 18px;
 }
 a.nav_home {
-    background: url(../img/fatcow16/house.png) 10px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/house.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
 a.nav_purchases {
-    background: url(../img/fatcow16/money.png) 10px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/money.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
 a.nav_items {
-    background: url(../img/fatcow16/basket.png) 10px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/basket.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
 a.nav_settings {
-    background: url(../img/fatcow16/setting_tools.png) 10px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/setting_tools.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
 a.nav_admin {
-    background: url(../img/fatcow16/administrator.png) 10px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/administrator.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
 a.nav_help {
-    background: url(../img/fatcow16/help.png) 10px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/help.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
 a.nav_logout {
-    background: url(../img/fatcow16/door_in.png) 10px 7px no-repeat #f3f3f3;
+    background: url(../img/fatcow/16/door_in.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
-a.nav_fblogin {
-    background: url(../img/fb_16x16.png) 10px 7px no-repeat #f3f3f3;
+a.nav_login {
+    background: url(../img/fatcow/16/key.png) 10px 7px no-repeat #f3f3f3;
+    padding-left: 30px;
+}
+a.nav_register {
+    background: url(../img/fatcow/16/user_add.png) 10px 7px no-repeat #f3f3f3;
     padding-left: 30px;
 }
 

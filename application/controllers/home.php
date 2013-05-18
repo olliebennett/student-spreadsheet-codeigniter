@@ -1,7 +1,1 @@
-<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
-class Home extends CI_Controller {		private $slug = 'home';	private $is_logged_in;		private $facebook_uid;	// Constructor	function __construct() {		parent::__construct();				// Do not require login		$this->is_logged_in = $this->auth->is_logged_in();		$this->facebook_uid = $this->session->userdata('facebook_uid');
-				$this->output->enable_profiler(TRUE);			}
-	// Index
-	function index() {					// set page title and slug (for current menu highlight)		$data['title'] = 'Home';		$data['slug'] = 'home';				$data['content'] = 'This is the homepage.';								// Send to view		$data['slug'] = $this->slug;		$this->load->view('template',$data);
-	}	
-}// EOF
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');class Home extends CI_Controller {	// Constructor	function __construct() {		parent::__construct();		// Get User info		$this->load->model('users_model');		$this->user = $this->users_model->getUser(FALSE, FALSE, FALSE); // do not force login, registration, or refresh		//d($this->user, '$this->user');	    if (ENVIRONMENT == 'development') {	      $this->output->enable_profiler(true);	    }	}	// Index	function index() {		$data['title'] = 'Home';		$data['user'] = $this->user;		$data['content'] = 'This is the homepage.';		// Send to view		$this->load->view('template', $data);	}}// EOF
