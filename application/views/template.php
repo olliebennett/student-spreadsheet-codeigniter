@@ -6,7 +6,7 @@
           <button type="button" class="close" data-dismiss="alert">&times;</button>
           <?php echo $this->session->flashdata($alert_type); ?>
 <?php if ($alert_type === 'error') : ?>
-          <br />Please <a href="<?php echo site_url('help/contact'); ?>">get in touch</a> if you require assistance or help with this.
+          <br />Please <a href="<?php echo site_url('help/contact'); ?>">get in touch</a> if you need help with this.
 <?php endif; ?>
         </div>
 <?php endif ?>
@@ -17,7 +17,7 @@
 <?php if (isset($subnav)) : ?>
     <p>
 <?php foreach ($subnav as $k => $v) : ?>
-        <a href="<?php echo site_url($this->uri->segment(1).'/'.$k); ?>" class="btn btn-small" type="button">
+        <a href="<?php echo site_url($this->uri->segment(1).'/'.$k); ?>" class="btn btn-small<?php echo (($k == $this->uri->segment(2)) ? ' disabled' : ''); ?>" type="button">
             <?php echo $v; ?>
         </a>
 <?php endforeach; ?>

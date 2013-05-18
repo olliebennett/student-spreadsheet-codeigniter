@@ -90,8 +90,8 @@ function cur_code_to_ascii($currency_code)
  * Render Help Tip
  * - build html for pop-over help tips.
  */
-function helptip($str, $href='#') {
-	return '<a href="' . $href . '" class="helptip" data-toggle="tooltip" title="' . $str . '"><i class="icon-question-sign"></i></a>';
+function helptip($str, $placement='top') {
+	return '<a href="#" class="helptip" data-toggle="tooltip" data-placement="' . $placement . '" title="' . $str . '"><i class="icon-question-sign"></i></a>';
 }
 
 /**

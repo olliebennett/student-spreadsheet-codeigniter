@@ -26,7 +26,7 @@ class Comments_model extends CI_Model {
 
     }
 
-    function addComment($purchase_id, $comment_string, $user_id, $comment_type = 'dispute') {
+    function addComment($purchase_id, $comment_string, $user_id, $comment_type = 'comment') {
         
         $c_data = array(
             'parent_id'          => $purchase_id,

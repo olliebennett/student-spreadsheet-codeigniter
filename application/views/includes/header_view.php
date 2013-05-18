@@ -49,7 +49,7 @@
 
 <body>
 
-  <div id=container>
+  <div id="container">
     <header>
       <div id="topbar">
         <div id="stsp_logo">
@@ -82,8 +82,8 @@
         <span class="pull-right"><a href="<?php echo site_url('register'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'register') ? ' nav_current' : '') ?> nav_register">Register</a></span>
         <span class="pull-right"><a href="<?php echo site_url('auth'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'auth') ? ' nav_current' : '') ?> nav_login">Login</a></span>
 <?php endif; ?>
-        <span class="pull-right"><a href="<?php echo site_url('help'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'help') ? ' nav_current' : '') ?> nav_help">Help</a></span>
-<?php if ((isset($user['user_id']) && $user['user_id'] == '1')) : ?>
+        <span class="pull-right"><a href="<?php echo site_url('help/about'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'help') ? ' nav_current' : '') ?> nav_help">Help</a></span>
+<?php if ((isset($user['user_id']) && in_array($user['user_id'], $this->config->item('stsp_admins')))) : ?>
         <span class="pull-right"><a href="<?php echo site_url('admin'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'admin') ? ' nav_current' : '') ?> nav_admin">Admin</a></span>
 <?php endif; ?>
         <div class="clearfix"></div>
