@@ -9,11 +9,10 @@
     </footer>
   </div><!-- #container -->
 
-  <!-- Draw Cufon Fonts -->
-  <script>Cufon.now();</script>
-
-  <!-- jQuery -->
   <script>
+  
+  // Draw Cufon Fonts
+  Cufon.now();
 
   // Initially hide username
   $('#user_name').hide();
@@ -44,6 +43,7 @@
     $("table#purchases tr.purchase-overview").click(function() {
       $(this).next().toggle();
     });
+    // View purchase details when clicking on purchase details
     $("table#purchases tr.purchase-details").click(function() {
       // Send user to view this purchase
       window.location.href = "<?php echo site_url('purchases/view'); ?>/" + $(this).data('id');

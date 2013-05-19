@@ -72,9 +72,6 @@
       <nav id="main">
         <span class="pull-left"><a href="<?php echo site_url(); ?>" class="nav<?php echo (($this->uri->segment(1) == '') ? ' nav_current' : '') ?> nav_home">Home</a></span>
         <span class="pull-left"><a href="<?php echo site_url('purchases'); ?>" class="nav<?php echo $this->uri->uri_string() == 'purchases' ? ' nav_current' : ''; ?> nav_pos_left nav_purchases">Purchases</a><a href="<?php echo site_url('purchases/add'); ?>" class="nav<?php echo (($this->uri->uri_string() == 'purchases/add') ? ' nav_current' : '') ?> nav_pos_right nav_add">&nbsp;</a></span>
-        <?php /*
-        <span class="pull-left"><a href="<?php echo site_url('items'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'items' && $this->uri->segment(2) != 'add') ? ' nav_current' : '') ?> nav_pos_left nav_items">Items</a><a href="<?php echo site_url('items/add'); ?>" class="nav<?php echo (($this->uri->uri_string() == 'items/add') ? ' nav_current' : '') ?> nav_pos_right nav_add">&nbsp;</a></span>
-        */ ?>
         <span class="pull-left"><a href="<?php echo site_url('settings'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'settings') ? ' nav_current' : '') ?> nav_settings">Settings</a></span>
 <?php if (isset($user)) : ?>
         <span class="pull-right"><a href="<?php echo site_url('auth/logout'); ?>" class="nav nav_logout">Logout</a></span>
@@ -88,8 +85,6 @@
 <?php endif; ?>
         <div class="clearfix"></div>
       </nav>
-
-      <div class="clearfix"></div>
 
     </header>
 
