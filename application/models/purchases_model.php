@@ -110,6 +110,7 @@ class Purchases_model extends CI_Model {
             $purchases[$row->purchase_id]['date']        = $row->date;
             $purchases[$row->purchase_id]['house_id']    = $row->house_id;
             $purchases[$row->purchase_id]['split_type']  = $row->split_type;
+            $purchases[$row->purchase_id]['edit_parent']  = $row->edit_parent;
 
             // Price this payee must contribute
             $purchases[$row->purchase_id]['payees'][$row->user_id] = $row->price;

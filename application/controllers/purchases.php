@@ -41,7 +41,11 @@ class Purchases extends CI_Controller {
 
   }
 
-  function _verifyPurchasePermissions($edit_id, $user_id) {
+  function _verifyPurchasePermissions($purchase_id, $user_id) {
+    
+    //$perms['view'] = false;
+    //$perms['edit'] = false;
+    //$perms['delete'] = false;
 
     // Verify purchase with edit_id exists
 
@@ -51,11 +55,13 @@ class Purchases extends CI_Controller {
     // return FALSE; // not valid!
 
     // Valid!
-    return $edit_id;
-
+    return $purchase_id;
 
   }
 
+  /**
+   * Add Purchase
+   */
   function add() {
 
     $this->load->helper('form');
@@ -169,43 +175,56 @@ class Purchases extends CI_Controller {
 
   }
 
+  /*
+   * View Purhase
+   */
+  function view($purchase_id = NULL) {
+    
+    $this->load->helper('form');
 
-  function view($id=NULL) {
-
-    if ($id == NULL) {
+    if ($purchase_id == NULL) {
       $this->session->set_flashdata('error', 'No purchase ID specified.');
       redirect('purchases');
     }
 
     // Ensure a valid (numeric) purchase id was given
-    if (!is_numeric($id)) {
+    if (!is_numeric($purchase_id)) {
       $this->session->set_flashdata('error', 'Invalid purchase ID was specified when viewing details.');
       redirect('purchases');
     }
 
-    $data['purchase_id'] = $id;
+    $data['purchase_id'] = $purchase_id;
+    $next_purchase_id = $purchase_id;
 
-    // Get purchase details
-    $data['purchases'] = $this->purchases_model->getPurchaseById($id);
+    // Collect any old (edited) versions of the purchase too.
+    do {
+            
+      // Get purchase details
+      $purchase = $this->purchases_model->getPurchaseById($next_purchase_id);
 
-    // Get Comments
-    // TODO
-    $comments = $this->comments_model->getComments($id);
-    //d($comments, 'comments');
-    if (count($comments) > 0) {
-      foreach ($comments as $comment) {
-        $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['text'] = $comment['comment_text'];
-        $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['added_by'] = $comment['comment_added_by'];
-        $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['added_time'] = $comment['comment_added_time'];
-        $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['type'] = $comment['comment_type'];
+      // Get purchase comments
+      $comments = $this->comments_model->getComments($next_purchase_id);
+      //d($comments, 'comments');
+      if (count($comments) > 0) {
+        foreach ($comments as $comment) {
+          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['text'] = $comment['comment_text'];
+          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['added_by'] = $comment['comment_added_by'];
+          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['added_time'] = $comment['comment_added_time'];
+          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['type'] = $comment['comment_type'];
+        }
       }
-    }
-
+            
+      // Add purchase (and comment details) to purchases array.
+      $data['purchases'][$next_purchase_id] = $purchase[$next_purchase_id];
+            
+      $next_purchase_id = $purchase[$next_purchase_id]['edit_parent'];
+            
+    } while ($next_purchase_id != NULL);
 
     //d($p,'p');
     //die();
 
-    // Check that (exactly) one purchase was found
+    // Check that (at least) one purchase was found
     if (count($data['purchases']) == 0) {
       $this->session->set_flashdata('error', 'No purchase found with this ID.');
       redirect('purchases');
@@ -244,7 +263,9 @@ class Purchases extends CI_Controller {
 
   }
 
-
+  /*
+   * Comment on Purhase
+   */
   function comment($purchase_id = 0) {
 
     if ($purchase_id == 0) exit('no purchase id provided to comment on');
@@ -256,7 +277,9 @@ class Purchases extends CI_Controller {
 
   }
 
-
+  /*
+   * Consolidate Purchases
+   */
   function consolidate() {
 
     // Get all purchases
@@ -307,8 +330,6 @@ class Purchases extends CI_Controller {
         'price' => $diff
       );
 
-
-
       $i++;
     }
     // Show a warning if things have got out of hand!
@@ -329,7 +350,9 @@ class Purchases extends CI_Controller {
 
   }
 
-
+  /*
+   * Export Purchases
+   */
   function export($filetype = null) {
 
     if (in_array($filetype, array('csv', 'xml'))) {

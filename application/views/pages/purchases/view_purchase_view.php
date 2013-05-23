@@ -44,6 +44,8 @@ d($purchases, 'purchases'); // plural, as we also receive old versions of purcha
 
 	<p>This purchase was added using <?php echo ($purchase['split_type'] == 'even') ? 'an <em>even</em>' : (($purchase['split_type'] == 'custom') ? 'a <em>custom</em>' : 'an <b>UNKNOWN</b>'); ?> split. <?php echo helptip('When adding purchases, the price can be split either evenly between payers, or manually.'); ?></p>
 
+<?php endforeach; // end purchases loop ?>
+  
 <?php if(isset($purchase['comments']) && count($purchase['comments']) >= 1): ?>
 
 	<table class="purchase-comments" class="table table-bordered">
@@ -81,10 +83,31 @@ d($purchases, 'purchases'); // plural, as we also receive old versions of purcha
 
 <?php endif ?>
 
-<?php echo anchor('purchases/edit/'.$purchase_id, 'Edit', 'class="edit"'); ?> |
-<?php echo anchor('purchases/dispute/'.$purchase_id, 'Dispute', 'class="dispute"'); ?> |
-<?php echo anchor('purchases/delete/'.$purchase_id, 'Delete', 'class="delete"'); ?> |
-<?php echo anchor('purchases/undelete/'.$purchase_id, 'Undelete', 'class="undelete"'); ?> |
-<?php echo anchor('purchases/comment/'.$purchase_id, 'Comment', 'class="comment"'); ?>
+<?php echo form_open('purchases/addcomment', array('id'=>'comment_form','class'=>'')); ?>
 
-<?php endforeach; ?>
+  <div class="control-group">
+  	<?php //echo form_err('comment'); ?>
+    <label class="control-label" for="comment">Comment or Dispute</label>
+    <div class="controls">
+      <textarea rows="3" name="comment" id="comment" class="span5" placeholder="Enter comment or dispute text" ></textarea>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="controls">
+      <a class="btn btn-warning"><i class="icon-legal"></i> Add Dispute</a>
+      <a class="btn btn-inverse"><i class="icon-comment"></i> Add Comment</a>
+      <span class="help-inline"><?php echo helptip('Dispute vs. Comment.', 'right'); ?></span>
+    </div>
+  </div>
+  
+  <div class="control-group">
+    <div class="controls">
+      <a href="<?php echo site_url('purchases/edit/'.$purchase_id, 'Edit'); ?>" class="btn btn-primary" ><i class="icon-edit"></i> Edit Purchase</a>
+      <a href="<?php echo site_url('purchases/delete/'.$purchase_id, 'Edit'); ?>" class="btn btn-danger" ><i class="icon-remove"></i> Delete Purchase</a>
+      <a href="<?php echo site_url('purchases/undelete/'.$purchase_id, 'Edit'); ?>" class="btn btn-success"><i class="icon-undo"></i> Undelete Purchase</a>
+    </div>
+  </div>
+
+</form>
+
