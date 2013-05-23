@@ -14,7 +14,7 @@
 
 <?php else : ?>
 
-<p>Showing # to # of <?php echo count($purchases); ?> purchases.</p>
+<p>Showing <!--# to # of --><?php echo count($purchases); ?> purchases.</p>
 
 <?php $this->load->view('pages/purchases/includes/table.php'); ?>
 

@@ -21,8 +21,7 @@
 
     <div class="control-group">
       <div class="controls">
-        <span>Select your primary/current house from the list below.</span>
-        <span id="savereminder-house" class="text-warning" style="display:none;"> (and click "Save Settings")</span>
+        <span>Select your primary/current house from the list below<span id="savereminder-house" class="text-warning" style="display:none;"> (and click "Save Settings")</span>.</span>
       </div>
     </div>
 
@@ -35,7 +34,7 @@
           <strong><?php echo $house['house_name']; ?></strong><!-- <?php echo 'ID: ' . $house_id; ?> --> (created <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($house['house_joined'])); ?>">on <?php echo $house['house_joined']; ?></time> by <em><?php echo $housemates_all[$house_id][$house['house_created_by']]['user_name']; ?></em>)
         </label>
 <?php endforeach; ?>
-        <span class="help-block">Alternatively, click <a href="<?php echo site_url('register'); ?>">here</a> to create a new house.</span>
+        <span class="help-block">Click <a href="<?php echo site_url('register'); ?>">here</a> to register a new house.</span>
       </div>
     </div>
 
