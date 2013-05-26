@@ -31,7 +31,7 @@ class Purchases extends CI_Controller {
     );
 
     // Calculate housemate balances
-    $data['balances'] = $this->getBalances($data['purchases']);
+    $data['balances'] = $this->_getBalances($data['purchases']);
 
     // Send to view
     $data['user'] = $this->user;
@@ -154,6 +154,15 @@ class Purchases extends CI_Controller {
       $this->session->set_flashdata('error', 'No purchase found with this ID.');
       redirect('purchases');
     }
+    
+    // Do not allow editing of deleted purchases or old versions
+    if ($p[$purchase_id]['status'] == 'deleted') {
+      $this->session->set_flashdata('error', 'Deleted purchases cannot be edited.');
+      redirect("purchases/view/$purchase_id");
+    } else if ($p[$purchase_id]['status'] == 'edited') {
+      $this->session->set_flashdata('error', 'Previous purchase versions cannot be edited.');
+      redirect("purchases/view/$purchase_id");
+    }
 
     $this->load->helper('form');
 
@@ -195,29 +204,36 @@ class Purchases extends CI_Controller {
 
     $data['purchase_id'] = $purchase_id;
     $next_purchase_id = $purchase_id;
+    $old_purchase_id = null;
 
     // Collect any old (edited) versions of the purchase too.
     do {
             
       // Get purchase details
-      $purchase = $this->purchases_model->getPurchaseById($next_purchase_id);
+      $next_purchase = $this->purchases_model->getPurchaseById($next_purchase_id);
+
+      // Add to purchases array.
+      $data['purchases'][$next_purchase_id] = $next_purchase[$next_purchase_id];
 
       // Get purchase comments
       $comments = $this->comments_model->getComments($next_purchase_id);
       //d($comments, 'comments');
       if (count($comments) > 0) {
         foreach ($comments as $comment) {
-          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['text'] = $comment['comment_text'];
-          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['added_by'] = $comment['comment_added_by'];
-          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['added_time'] = $comment['comment_added_time'];
-          $data['purchases'][$next_purchase_id][$comment['parent_id']]['comments'][$comment['comment_id']]['type'] = $comment['comment_type'];
+          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['text'] = $comment['comment_text'];
+          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['added_by'] = $comment['comment_added_by'];
+          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['added_time'] = $comment['comment_added_time'];
+          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['type'] = $comment['comment_type'];
         }
       }
-            
-      // Add purchase (and comment details) to purchases array.
-      $data['purchases'][$next_purchase_id] = $purchase[$next_purchase_id];
-            
-      $next_purchase_id = $purchase[$next_purchase_id]['edit_parent'];
+      
+      // Get any changes made to the purchase (apart from on the first purchase!)
+      if ($old_purchase_id != NULL) {
+        $data['purchases'][$old_purchase_id]['edit_changes'] = $this->_getPurchaseDifferences($data['purchases'][$next_purchase_id], $data['purchases'][$old_purchase_id], $this->housemates);
+      }
+      
+      $old_purchase_id = $next_purchase_id;
+      $next_purchase_id = $data['purchases'][$next_purchase_id]['edit_parent'];
             
     } while ($next_purchase_id != NULL);
 
@@ -229,6 +245,9 @@ class Purchases extends CI_Controller {
       $this->session->set_flashdata('error', 'No purchase found with this ID.');
       redirect('purchases');
     }
+    
+    // Sort the array by its keys
+    ksort($data['purchases']);
 
     // Check that user has access to view this purchase
     // if (!in_array($this->user->id, array(
@@ -590,8 +609,46 @@ class Purchases extends CI_Controller {
 
   }
 
+  /**
+   * Compare Purchases
+   * - Determine what has changed between two purchase versions, i.e. from $a to $b.
+   * - $users is specified to extract usernames into string.
+   * - returns an array of change explanations, eg.
+   *   > "changed the purchase type from X to Y".
+   *   > "made no changes".
+   *   > "increased the purchase price from X to Y".
+   *   > "split the purchase with an extra user".
+   *   > ... etc.
+   */
+  function _getPurchaseDifferences($a, $b, $users) {
+    
+    $diffs = array();
+            
+    // Description
+    if ($a['description'] != $b['description']) {
+      $diffs[] = "changed description from '<b>" . $a['description'] . "</b>' to '<b>" . $b['description'] . "</b>'.";
+    }
+    
+    // Date
+    if ($a['date'] != $b['date']) {
+      $diffs[] = "changed date from '<b>" . $a['date'] . "</b>' to '<b>" . $b['date'] . "</b>'.";
+    }
+    
+    // Payer
+    if ($a['payer'] != $b['payer']) {
+      $diffs[] = "changed payer from '<b>" . $users[$a['payer']]['user_name'] . "</b>' to '<b>" . $users[$b['payer']]['user_name'] . "</b>'.";
+    }
+    
+    // Split Type
+    if ($a['split_type'] != $b['split_type']) {
+      $diffs[] = "changed split type from '<b>" . $a['split_type'] . "</b>' to '<b>" . $b['split_type'] . "</b>'.";
+    }
+    
+    return $diffs;
+    
+  }
 
-  function getBalances($purchases) {
+  function _getBalances($purchases) {
 
     $balances = array();
 

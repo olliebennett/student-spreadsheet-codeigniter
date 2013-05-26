@@ -21,7 +21,7 @@ class Purchases_model extends CI_Model {
         $this->db->from('purchases p');
         $this->db->join('link_purchases_users lpu', 'lpu.purchase_id = p.purchase_id');
         $this->db->where('p.house_id', $house_id);
-        $this->db->where('p.active', '1');
+        $this->db->where('p.status', 'ok');
         $this->db->order_by('p.added_time', 'desc');
         $query = $this->db->get();
 
@@ -105,7 +105,7 @@ class Purchases_model extends CI_Model {
             $purchases[$row->purchase_id]['description'] = $row->description;
             $purchases[$row->purchase_id]['added_by']    = $row->added_by;
             $purchases[$row->purchase_id]['added_time']  = $row->added_time;
-            $purchases[$row->purchase_id]['active']      = $row->active;
+            $purchases[$row->purchase_id]['status']      = $row->status;
             $purchases[$row->purchase_id]['payer']       = $row->payer;
             $purchases[$row->purchase_id]['date']        = $row->date;
             $purchases[$row->purchase_id]['house_id']    = $row->house_id;
@@ -153,7 +153,7 @@ class Purchases_model extends CI_Model {
             'split_type'  => $data['split_type']
         );
 
-        // Set "parent" purchase ID if present
+        // Specify edit details if necessary
         if (isset($data['edit_parent'])) {
             $p_data['edit_parent'] = $data['edit_parent'];
         }
@@ -180,9 +180,9 @@ class Purchases_model extends CI_Model {
         if (isset($data['edit_parent'])) {
             // Deactivate (i.e. "delete") old purchase.
             $p_old_data = array(
-                'deleted_time' => date("Y-m-d H:i:s"), // NOW()
-                'deleted_by' => $user_id,
-                'active' => 0
+                //'deleted_time' => date("Y-m-d H:i:s"), // NOW()
+                //'deleted_by' => $user_id,
+                'status' => 'edited'
             );
 
             $this->db->where('purchase_id', $data['edit_parent']);

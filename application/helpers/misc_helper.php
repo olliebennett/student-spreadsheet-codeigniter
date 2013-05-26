@@ -115,7 +115,22 @@ function validate_mobile($num)
 	}
 }
 
-
+/*
+ * "a" or "an"? Indefinite article adder
+ */
+function anUNUSED($string) {
+  
+  if ($string == '') {
+    return '';
+  }
+  
+  if (in_array(str2lower(substr($string, 0, 1)), 'a','e','i','o','u','h')) {
+    return "an $string";
+  }
+  
+  return "a $string";
+  
+}
 
 
 /* Display Time Ago */

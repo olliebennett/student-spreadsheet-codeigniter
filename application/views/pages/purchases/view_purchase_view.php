@@ -6,82 +6,49 @@ d($purchases, 'purchases'); // plural, as we also receive old versions of purcha
 //d($user,'user');
 ?>
 
-<?php foreach ($purchases as $purchase) : ?>
+<?php $purchase = $purchases[max(array_keys($purchases))]; // get latest version to display ?>
 
-	<table id="purchase-details" class="table table-bordered">
-		<tr>
-			<th>Description</th>
-			<td><?php echo $purchase['description']; ?></td>
-		</tr>
-		<tr>
-			<th>Payer</th>
-			<td><?php echo $housemates[$purchase['payer']]['user_name']; ?></td>
-		</tr>
-		<tr>
-			<th>Purchase Date</th>
-			<td><?php echo strftime('%a %d %b %Y', strtotime($purchase['date'])); ?></td>
-		</tr>
+<?php $this->load->view('pages/purchases/includes/purchase_info_table.php', array('purchase' => $purchase, 'housemates' => $housemates)); ?>
 
-		<tr>
-			<th>Added by:</th>
-			<td><?php echo ($purchase['added_by'] == $user['user_id']) ? 'You' : $housemates[$purchase['added_by']]['user_name']; ?><!-- <?php echo $purchase['added_by']; ?> --></td>
-		</tr>
-		<tr>
-			<th>Added on:</th>
-			<td><?php echo strftime('%a %d %b %Y', strtotime($purchase['added_time'])); ?> (<time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($purchase['added_time'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($purchase['added_time'])); ?></time>)</td>
-		</tr>
-		<tr>
-			<th>Total Price </th>
-			<td><strong>£ <?php echo number_format($purchase['total_price'], 2); ?></strong></td>
-		</tr>
-<?php foreach ($purchase['payees'] as $payee_id => $payee_price) : ?>
-		<tr>
-			<th><?php echo $housemates[$payee_id]['user_name']; ?></th>
-			<td>£ <?php echo number_format($payee_price, 2); ?></td>
-		</tr>
-<?php endforeach; ?>
-	</table>
 
-	<p>This purchase was added using <?php echo ($purchase['split_type'] == 'even') ? 'an <em>even</em>' : (($purchase['split_type'] == 'custom') ? 'a <em>custom</em>' : 'an <b>UNKNOWN</b>'); ?> split. <?php echo helptip('When adding purchases, the price can be split either evenly between payers, or manually.'); ?></p>
+<h3>Purchase History and Comments</h3>
 
-<?php endforeach; // end purchases loop ?>
-  
-<?php if(isset($purchase['comments']) && count($purchase['comments']) >= 1): ?>
+<div class="accordion" id="purchase-history">
 
-	<table class="purchase-comments" class="table table-bordered">
+<?php foreach ($purchases as $p_id => $p) : // purchases ?>
 
-		<thead>
-			<tr>
-				<th>Author</th>
-				<th>Comment</th>
-				<th>Date</th>
-			</tr>
-		</thead>
+<?php if ($p_id == min(array_keys($purchases))) : // is original version ?>
+<div class="accordion-group">
+  <div class="accordion-heading">
+    <a class="accordion-toggle" data-toggle="collapse" data-parent="#purchase-history" href="#purchase-history-<?php echo $p_id; ?>">
+      Added by XYZ on YYYY-MM-DD
+    </a>
+  </div>
+  <div id="purchase-history-<?php echo $p_id; ?>" class="accordion-body collapse in">
+    <div class="accordion-inner">
+      Anim pariatur cliche...
+    </div>
+  </div>
+</div>
+<?php else : // is more recent version ?>
+<h4>Edited by XYZ</h4>
+<div class="accordion-group">
+<ul>
+<?php foreach ($p['edit_changes'] as $change) : // edit changes ?>
+  <li><?php echo $change; ?></li>
+<?php endforeach; // edit changes ?>
+</ul>
+</div>
+<?php endif; ?>
 
-		<tbody>
+<?php foreach ($p['comments'] as $comment) : // comments ?>
+<h4>Comment: <?php echo $comment['text']; ?></h4>
+<?php endforeach; // comments ?>
 
-<?php foreach ($purchase['comments'] as $comment) : ?>
-<?php $t = strtotime($comment['added_time']); ?>
 
-			<tr>
-				<td><?php echo $comment['added_by']; ?></td>
-				<td><?php echo $comment['text']; ?></td>
-				<td>
-					<time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', $t); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', $t); ?></time>
-				</td>
-			</tr>
+<?php endforeach; // purchases ?>
 
-<?php endforeach; ?>
-
-		</tbody>
-
-	</table>
-
-<?php else : ?>
-
-	<p>No comments have been made on this purchase.</p>
-
-<?php endif ?>
+</div><!-- #purchase-history -->
 
 <?php echo form_open('purchases/addcomment', array('id'=>'comment_form','class'=>'')); ?>
 
