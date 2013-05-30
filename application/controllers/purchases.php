@@ -204,14 +204,28 @@ class Purchases extends CI_Controller {
 
     $data['purchase_id'] = $purchase_id;
     $next_purchase_id = $purchase_id;
-    $old_purchase_id = null;
+    $old_purchase_id = NULL;
 
     // Collect any old (edited) versions of the purchase too.
     do {
             
       // Get purchase details
       $next_purchase = $this->purchases_model->getPurchaseById($next_purchase_id);
-
+      
+      //d($next_purchase, 'next purchase');
+      
+      // Was purchase found, and has user got permission to view it?
+      if ($next_purchase === FALSE || FALSE == $this->_userCanView($next_purchase[$next_purchase_id], $this->user['user_id'])) {
+        $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
+        redirect('purchases');
+      }
+      
+      // If there is a child of the main purchase, redirect user to the latest version.
+      if (NULL == $old_purchase_id && NULL != $next_purchase[$next_purchase_id]['edit_child']) {
+        $this->session->set_flashdata('info', 'You were redirected to the latest version of this purchase.');
+        redirect('purchases/view/' . $next_purchase[$next_purchase_id]['edit_child']);
+      }
+      
       // Add to purchases array.
       $data['purchases'][$next_purchase_id] = $next_purchase[$next_purchase_id];
 
@@ -285,15 +299,41 @@ class Purchases extends CI_Controller {
   /*
    * Comment on Purhase
    */
-  function comment($purchase_id = 0) {
+  function addcomment($purchase_id = NULL) {
 
-    if ($purchase_id == 0) exit('no purchase id provided to comment on');
+    if ($purchase_id == NULL) {
+      $this->session->set_flashdata('error', 'No comment ID specified to comment on.');
+      redirect("purchases");
+    }
 
-    // Send to view
-    $data['title'] = 'Comment on Purchase';
-    $data['view'] = 'placeholder';
-    $this->load->view('template', $data);
+    // Get Purchase info
+    $purchase = $this->purchases_model->getPurchaseById($purchase_id);
 
+    // Verify purchase exists and user has permission.
+    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id], $this->user['user_id'])) {
+      $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
+      redirect("purchases");
+    }
+
+    if ($text = htmlspecialchars(trim($this->input->post('commenttext')))) {
+
+      // Is it a comment or a dispute?
+      // note - $_POST['button_dispute'] will be '' if dispute was pressed.
+      $type = (($this->input->post('button_dispute') === '') ? 'dispute' : 'comment');
+
+      if ($this->purchases_model->addComment($this->user['user_id'], $purchase_id, $text, $type)) {
+        // it worked
+        $this->session->set_flashdata('success', "Your $type was added successfully.");
+        redirect("purchases/view/$purchase_id");
+      } else {
+        // comment save failed
+        $this->session->set_flashdata('error', "There was an error saving your $type. Please try again later.");
+        redirect("purchases/view/$purchase_id");
+      }
+    } else {
+      $this->session->set_flashdata('error', 'No comment data received.');
+      redirect("purchases");
+    }
   }
 
   /*
@@ -465,8 +505,6 @@ class Purchases extends CI_Controller {
     }
   }
 
-
-
   /**
    * Validate POST Data
    *
@@ -608,6 +646,34 @@ class Purchases extends CI_Controller {
     return $ret;
 
   }
+  
+  function _userCanModify($purchase, $user_id) {
+    
+    if ($user_id == $purchase['added_by']) {
+      return TRUE;
+    }
+    
+    if ($user_id == $purchase['payer']) {
+      return TRUE;
+    }
+    
+    return FALSE;
+    
+  }
+  
+  function _userCanView($purchase, $user_id) {
+    
+    if ($this->_userCanModify($purchase, $user_id)) {
+      return TRUE;
+    }
+    
+    if (in_array($user_id, array_keys($purchase['payees']))) {
+      return TRUE;
+    }
+    
+    return FALSE;
+    
+  }
 
   /**
    * Compare Purchases
@@ -622,6 +688,10 @@ class Purchases extends CI_Controller {
    */
   function _getPurchaseDifferences($a, $b, $users) {
     
+    //d($a,'a');
+    //d($b,'b');
+    //d($users, 'users');
+
     $diffs = array();
             
     // Description
@@ -631,7 +701,7 @@ class Purchases extends CI_Controller {
     
     // Date
     if ($a['date'] != $b['date']) {
-      $diffs[] = "changed date from '<b>" . $a['date'] . "</b>' to '<b>" . $b['date'] . "</b>'.";
+      $diffs[] = "changed purchase date from '<b>" . $a['date'] . "</b>' to '<b>" . $b['date'] . "</b>'.";
     }
     
     // Payer
@@ -643,6 +713,34 @@ class Purchases extends CI_Controller {
     if ($a['split_type'] != $b['split_type']) {
       $diffs[] = "changed split type from '<b>" . $a['split_type'] . "</b>' to '<b>" . $b['split_type'] . "</b>'.";
     }
+
+    // Payees
+    foreach (array_unique(array_merge(array_keys($a['payees']),array_keys($b['payees']))) as $payee_id) {
+      if (isset($a['payees'][$payee_id])) {
+        if (isset($b['payees'][$payee_id])) {
+          // in BOTH - check if amounts have changed
+          if ($a['payees'][$payee_id] != $b['payees'][$payee_id]) {
+            if ($a['payees'][$payee_id] > $b['payees'][$payee_id]) {
+              $diff = "decreased";
+            } else {
+              $diff = "increased";
+            }            
+            $diffs[] = $diff . " amount '<b>" . $users[$payee_id]['user_name'] . "</b>' owes from <b>" . render_price($a['payees'][$payee_id]) . "</b> to <b>" . render_price($b['payees'][$payee_id]) . "</b>.";
+          }
+        } else {
+          // in A only
+          $diffs[] = "removed '<b>" . $users[$payee_id]['user_name'] . "</b>' from the list of payees.";
+        }
+      } else {
+        // in B only
+        $diffs[] = "added '<b>" . $users[$payee_id]['user_name'] . "</b>' to the list of payees, for <b>" . render_price($b['payees'][$payee_id]) . "</b>.";
+      }
+    }
+
+    if (count($diffs) == 0) {
+      $diffs[] = 'No changes were made to the purchase.';
+    }
+
     
     return $diffs;
     

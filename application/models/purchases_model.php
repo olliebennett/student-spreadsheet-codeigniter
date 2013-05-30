@@ -67,11 +67,13 @@ class Purchases_model extends CI_Model {
      *
      * - also accepts an array of purchase IDs
      *
+     * returns FALSE if purchase not found.
+     *
      */
     function getPurchaseById($purchase_id)
     {
 
-        $this->db->select('*');
+        $this->db->select('*'); // TODO - specify required fields?
         $this->db->from('purchases p');
         $this->db->join('link_purchases_users lpu', 'lpu.purchase_id = p.purchase_id');
         //$this->db->join('comments c', 'c.parent_id = p.purchase_id', 'left');
@@ -84,8 +86,9 @@ class Purchases_model extends CI_Model {
 
         $query = $this->db->get();
 
-        // if($query->num_rows()!==0) return $query->result();
-         // else return FALSE;
+        if($query->num_rows() === 0) {
+          return FALSE;
+        }
 
         return $this->purchasesArrayFromQuery($query);
 
@@ -111,6 +114,8 @@ class Purchases_model extends CI_Model {
             $purchases[$row->purchase_id]['house_id']    = $row->house_id;
             $purchases[$row->purchase_id]['split_type']  = $row->split_type;
             $purchases[$row->purchase_id]['edit_parent']  = $row->edit_parent;
+            $purchases[$row->purchase_id]['edit_child']  = $row->edit_child;
+
 
             // Price this payee must contribute
             $purchases[$row->purchase_id]['payees'][$row->user_id] = $row->price;
@@ -182,7 +187,8 @@ class Purchases_model extends CI_Model {
             $p_old_data = array(
                 //'deleted_time' => date("Y-m-d H:i:s"), // NOW()
                 //'deleted_by' => $user_id,
-                'status' => 'edited'
+                'status' => 'edited',
+                'edit_child' => $purchase_id
             );
 
             $this->db->where('purchase_id', $data['edit_parent']);
@@ -196,6 +202,21 @@ class Purchases_model extends CI_Model {
         }
         log_message('error', 'Transaction failed!');
         return false;
+    }
+
+    function addComment($user_id, $purchase_id, $text, $type) {
+
+        $c_data = array(
+            'comment_added_by' => $user_id,
+            'comment_text'     => $text,
+            'comment_type'     => $type,
+            'comment_added_time'       => date("Y-m-d H:i:s"), // NOW()
+            'parent_id'        => $purchase_id
+        );
+
+        // Return success - TRUE or FALSE
+        return $this->db->insert('comments', $c_data);
+
     }
 
 }

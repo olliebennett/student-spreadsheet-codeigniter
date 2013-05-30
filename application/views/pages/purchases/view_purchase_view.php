@@ -6,13 +6,34 @@ d($purchases, 'purchases'); // plural, as we also receive old versions of purcha
 //d($user,'user');
 ?>
 
-<?php $purchase = $purchases[max(array_keys($purchases))]; // get latest version to display ?>
+<?php //$purchase = $purchases[max(array_keys($purchases))]; // get latest version to display ?>
+<?php $purchase = $purchases[$purchase_id]; // get latest version to display ?>
 
 <?php $this->load->view('pages/purchases/includes/purchase_info_table.php', array('purchase' => $purchase, 'housemates' => $housemates)); ?>
 
+<a href="<?php echo site_url('purchases/edit/'.$purchase_id, 'Edit'); ?>" class="btn btn-primary" ><i class="icon-edit"></i> Edit Purchase</a>
+<?php if ($purchase['status'] == 'deleted') : ?>
+<a href="<?php echo site_url('purchases/undelete/'.$purchase_id, 'Undelete'); ?>" class="btn btn-success"><i class="icon-undo"></i> Undelete Purchase</a>
+<?php else : ?>
+<a href="<?php echo site_url('purchases/delete/'.$purchase_id, 'Delete'); ?>" class="btn btn-danger" ><i class="icon-remove"></i> Delete Purchase</a>
+<?php endif; // deleted ?>
 
 <h3>Purchase History and Comments</h3>
 
+<p>[ <span id="accordion-toggle-all">expand all</span> ]</p>
+<script>
+$('#accordion-toggle-all').click(function() {
+  if ($('#accordion-toggle-all').text() === 'expand all') {
+    console.log('showing all');
+    $('.accordion-body').collapse('show');
+    $('#accordion-toggle-all').text('collapse all');
+  } else {
+    console.log('hiding all');
+    $('.accordion-body').collapse('hide');
+    $('#accordion-toggle-all').text('expand all');
+  }
+});
+</script>
 <div class="accordion" id="purchase-history">
 
 <?php foreach ($purchases as $p_id => $p) : // purchases ?>
@@ -20,59 +41,85 @@ d($purchases, 'purchases'); // plural, as we also receive old versions of purcha
 <?php if ($p_id == min(array_keys($purchases))) : // is original version ?>
 <div class="accordion-group">
   <div class="accordion-heading">
-    <a class="accordion-toggle" data-toggle="collapse" data-parent="#purchase-history" href="#purchase-history-<?php echo $p_id; ?>">
-      Added by XYZ on YYYY-MM-DD
+    <a class="accordion-toggle" data-toggle="collapse" href="#purchase-history-p<?php echo $p_id; ?>">
+      <i class="icon-plus-sign"></i> <?php echo $p['added_time']; ?> : Added by <?php echo $housemates[$p['added_by']]['user_name']; ?>
     </a>
   </div>
-  <div id="purchase-history-<?php echo $p_id; ?>" class="accordion-body collapse in">
+  <div id="purchase-history-p<?php echo $p_id; ?>" class="accordion-body collapse">
     <div class="accordion-inner">
-      Anim pariatur cliche...
+      <ul class="unstyled">
+        <li>Description: <b><?php echo $p['description']; ?></b></li>
+        <li>Purchase Date: <?php echo $p['date']; ?></li>
+        <li>Paid by: <?php echo $housemates[$p['payer']]['user_name']; ?></li>
+        <li>Payees:
+          <ul>
+<?php foreach ($p['payees'] as $payee_id => $payee_val) : ?>
+            <li><?php echo $housemates[$payee_id]['user_name']; ?> pays <?php echo render_price($payee_val); ?></li>
+<?php endforeach; // payees ?>
+          </ul>
+        </li>
+        <li>Total Price: <?php echo render_price($p['total_price']); ?></li>
+      </ul>
     </div>
   </div>
 </div>
 <?php else : // is more recent version ?>
-<h4>Edited by XYZ</h4>
 <div class="accordion-group">
-<ul>
+  <div class="accordion-heading">
+    <a class="accordion-toggle" data-toggle="collapse" href="#purchase-history-p<?php echo $p_id; ?>">
+      <i class="icon-edit"></i> <?php echo $p['added_time']; ?> : Edited by <?php echo $housemates[$p['added_by']]['user_name']; ?>
+    </a>
+  </div>
+  <div id="purchase-history-p<?php echo $p_id; ?>" class="accordion-body collapse">
+    <div class="accordion-inner">
+      <ul class="unstyled">
 <?php foreach ($p['edit_changes'] as $change) : // edit changes ?>
-  <li><?php echo $change; ?></li>
+        <li><?php echo $change; ?></li>
 <?php endforeach; // edit changes ?>
-</ul>
+      </ul>
+    </div>
+  </div>
 </div>
+
 <?php endif; ?>
 
-<?php foreach ($p['comments'] as $comment) : // comments ?>
-<h4>Comment: <?php echo $comment['text']; ?></h4>
+<?php if (isset($p['comments'])) : ?>
+<?php foreach ($p['comments'] as $c_id => $comment) : // comments ?>
+<div class="accordion-group">
+  <div class="accordion-heading">
+    <a class="accordion-toggle" data-toggle="collapse" href="#purchase-history-c<?php echo $c_id; ?>">
+      <i class="icon-<?php echo ($comment['type'] == 'dispute') ? 'legal' : 'comment'; ?>"></i> <?php echo $comment['added_time']; ?> : Comment by <?php echo $housemates[$comment['added_by']]['user_name']; ?>
+    </a>
+  </div>
+  <div id="purchase-history-c<?php echo $c_id; ?>" class="accordion-body collapse in">
+    <div class="accordion-inner">
+      <?php echo $comment['text']; ?>
+    </div>
+  </div>
+</div>
 <?php endforeach; // comments ?>
-
+<?php endif; // comments exist ?>
 
 <?php endforeach; // purchases ?>
 
 </div><!-- #purchase-history -->
 
-<?php echo form_open('purchases/addcomment', array('id'=>'comment_form','class'=>'')); ?>
+<?php echo form_open("purchases/addcomment/$purchase_id", array('id'=>'comment_form','class'=>'')); ?>
+
+<h3>Add New Comment or Dispute</h3>
+
+<p>Enter your message below and create either a comment or dispute. <?php echo helptip('Dispute vs. Comment.', 'right'); ?></p>
 
   <div class="control-group">
-  	<?php //echo form_err('comment'); ?>
-    <label class="control-label" for="comment">Comment or Dispute</label>
     <div class="controls">
-      <textarea rows="3" name="comment" id="comment" class="span5" placeholder="Enter comment or dispute text" ></textarea>
+      <textarea rows="3" name="commenttext" id="commenttext" class="span5" placeholder="Enter comment or dispute text" ></textarea>
     </div>
   </div>
 
   <div class="control-group">
     <div class="controls">
-      <a class="btn btn-warning"><i class="icon-legal"></i> Add Dispute</a>
-      <a class="btn btn-inverse"><i class="icon-comment"></i> Add Comment</a>
-      <span class="help-inline"><?php echo helptip('Dispute vs. Comment.', 'right'); ?></span>
-    </div>
-  </div>
-  
-  <div class="control-group">
-    <div class="controls">
-      <a href="<?php echo site_url('purchases/edit/'.$purchase_id, 'Edit'); ?>" class="btn btn-primary" ><i class="icon-edit"></i> Edit Purchase</a>
-      <a href="<?php echo site_url('purchases/delete/'.$purchase_id, 'Edit'); ?>" class="btn btn-danger" ><i class="icon-remove"></i> Delete Purchase</a>
-      <a href="<?php echo site_url('purchases/undelete/'.$purchase_id, 'Edit'); ?>" class="btn btn-success"><i class="icon-undo"></i> Undelete Purchase</a>
+      <button class="btn btn-warning" type="submit" name="button_dispute"><i class="icon-legal"></i> Add Dispute</button>
+      <button class="btn btn-inverse" type="submit" name="button_comment"><i class="icon-comment"></i> Add Comment</button>
     </div>
   </div>
 

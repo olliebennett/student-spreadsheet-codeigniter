@@ -7,7 +7,7 @@ class Admin extends CI_Controller {
 	// Constructor
 	function __construct() {
 		parent::__construct();
-				
+
 		// Check user is admin
 		$admin_users = $this->config->item('stsp_admins');
 		/*
@@ -38,6 +38,7 @@ class Admin extends CI_Controller {
 	function index() {
 
 		// Send to view
+    $data['user'] = $this->user;
 		$data['subnav'] = $this->subnav;
 		$this->load->view('template', $data);
 		
@@ -55,9 +56,11 @@ class Admin extends CI_Controller {
             $data['houses'][$key]['housemates'] = $this->users_model->getHousemates($house['house_id']);
         }
         
+    $data['user'] = $this->user;
+    
 		// Send to view
 		$data['subnav'] = $this->subnav;
-        $data['view'] = 'admin/houses';
+    $data['view'] = 'admin/houses';
 		$this->load->view('template', $data);
 	
 	}
@@ -68,11 +71,13 @@ class Admin extends CI_Controller {
 		$data['title'] = 'All Users';
 		
 		$data['users'] = $this->admin_model->get_users();
+    
+    $data['user'] = $this->user;
 				
 		// Send to view
 		$data['subnav'] = $this->subnav;
-        $data['view'] = 'admin/users';
-        $this->load->view('template', $data);
+    $data['view'] = 'admin/users';
+    $this->load->view('template', $data);
 	
 	}
 
@@ -83,7 +88,7 @@ class Admin extends CI_Controller {
 
 		$data['title'] = 'All (Global) Notifications';
 		
-
+    $data['user'] = $this->user;
 		
 		$data['notifications'] = $this->notifications_model->getNotifications('all');
 				
