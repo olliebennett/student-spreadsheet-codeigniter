@@ -1,5 +1,5 @@
 <?php
-d($purchases, 'purchases'); // plural, as we also receive old versions of purchase
+//d($purchases, 'purchases'); // plural, as we also receive old versions of purchase
 //d($purchase_id, 'purchase_id');
 //d($purchases[$purchase_id], 'this actual purchase');
 //d($housemates, 'housemates');
@@ -9,11 +9,17 @@ d($purchases, 'purchases'); // plural, as we also receive old versions of purcha
 <?php //$purchase = $purchases[max(array_keys($purchases))]; // get latest version to display ?>
 <?php $purchase = $purchases[$purchase_id]; // get latest version to display ?>
 
+<?php if ($purchase['status'] == 'deleted') : ?>
+<h3 class="text-error">This purchase was deleted by <?php echo $housemates[$purchase['deleted_by']]['user_name']; ?> on <?php echo $purchase['deleted_time']; ?>.</h3>
+<?php endif; ?>
+
 <?php $this->load->view('pages/purchases/includes/purchase_info_table.php', array('purchase' => $purchase, 'housemates' => $housemates)); ?>
+
+<p>This purchase was added using <?php echo ($purchase['split_type'] == 'even') ? 'an <em>even</em>' : (($purchase['split_type'] == 'custom') ? 'a <em>custom</em>' : 'an <b>UNKNOWN</b>'); ?> split. <?php echo helptip('When adding purchases, the price can be split either evenly between payers, or manually.'); ?></p>
 
 <a href="<?php echo site_url('purchases/edit/'.$purchase_id, 'Edit'); ?>" class="btn btn-primary" ><i class="icon-edit"></i> Edit Purchase</a>
 <?php if ($purchase['status'] == 'deleted') : ?>
-<a href="<?php echo site_url('purchases/undelete/'.$purchase_id, 'Undelete'); ?>" class="btn btn-success"><i class="icon-undo"></i> Undelete Purchase</a>
+<a href="<?php echo site_url('purchases/restore/'.$purchase_id, 'Restore'); ?>" class="btn btn-success"><i class="icon-undo"></i> Restore Purchase</a>
 <?php else : ?>
 <a href="<?php echo site_url('purchases/delete/'.$purchase_id, 'Delete'); ?>" class="btn btn-danger" ><i class="icon-remove"></i> Delete Purchase</a>
 <?php endif; // deleted ?>
@@ -81,14 +87,14 @@ $('#accordion-toggle-all').click(function() {
   </div>
 </div>
 
-<?php endif; ?>
+<?php endif; // purchase version ?>
 
 <?php if (isset($p['comments'])) : ?>
 <?php foreach ($p['comments'] as $c_id => $comment) : // comments ?>
 <div class="accordion-group">
   <div class="accordion-heading">
     <a class="accordion-toggle" data-toggle="collapse" href="#purchase-history-c<?php echo $c_id; ?>">
-      <i class="icon-<?php echo ($comment['type'] == 'dispute') ? 'legal' : 'comment'; ?>"></i> <?php echo $comment['added_time']; ?> : Comment by <?php echo $housemates[$comment['added_by']]['user_name']; ?>
+      <i class="icon-<?php echo ($comment['type'] == 'dispute') ? 'legal' : 'comment'; ?>"></i> <?php echo $comment['added_time']; ?> : <?php echo ($comment['type'] == 'dispute') ? 'Dispute' : 'Comment'; ?> by <?php echo $housemates[$comment['added_by']]['user_name']; ?>
     </a>
   </div>
   <div id="purchase-history-c<?php echo $c_id; ?>" class="accordion-body collapse in">
@@ -99,6 +105,21 @@ $('#accordion-toggle-all').click(function() {
 </div>
 <?php endforeach; // comments ?>
 <?php endif; // comments exist ?>
+
+<?php if ($p['status'] == 'deleted') : ?>
+<div class="accordion-group">
+  <div class="accordion-heading">
+    <a class="accordion-toggle" data-toggle="collapse" href="#purchase-history-d<?php echo $p_id; ?>">
+      <i class="icon-remove"></i> <?php echo $p['deleted_time']; ?> : Deleted by <?php echo $housemates[$p['deleted_by']]['user_name']; ?>
+    </a>
+  </div>
+  <div id="purchase-history-d<?php echo $p_id; ?>" class="accordion-body collapse">
+    <div class="accordion-inner">
+      This purchase was deleted.
+    </div>
+  </div>
+</div>
+<?php endif; // purchase deleted ?>
 
 <?php endforeach; // purchases ?>
 

@@ -1,1 +1,0 @@
-... register_view.php ...<pre><?php var_dump($this->_ci_cached_vars); ?></pre>

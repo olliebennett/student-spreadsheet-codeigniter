@@ -7,7 +7,8 @@
  *
  * Have to set this to avoid warnings with PHP installation
  */
-date_default_timezone_set('Europe/London');
+//date_default_timezone_set('Europe/London');
+date_default_timezone_set('UTC');
 
 /*
  *---------------------------------------------------------------

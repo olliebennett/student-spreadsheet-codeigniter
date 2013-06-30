@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 19, 2013 at 04:05 PM
+-- Generation Time: May 31, 2013 at 07:31 PM
 -- Server version: 5.5.24-log
 -- PHP Version: 5.3.13
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `comment_type` enum('comment','dispute') NOT NULL,
   PRIMARY KEY (`comment_id`),
   KEY `comment_parent_id` (`parent_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=14 ;
 
 -- --------------------------------------------------------
 
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `houses` (
   `house_currency` char(3) NOT NULL DEFAULT 'GBP',
   `house_joined` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`house_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `link_houses_users` (
   `house_id` int(10) unsigned NOT NULL,
   `user_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`link_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci AUTO_INCREMENT=6 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `link_purchases_users` (
   `user_id` int(10) unsigned NOT NULL,
   `price` float NOT NULL COMMENT 'How much the user is contributing to the purchase',
   PRIMARY KEY (`link_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=16 ;
 
 -- --------------------------------------------------------
 
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS `purchases` (
   `description` varchar(50) NOT NULL,
   `added_by` bigint(20) NOT NULL,
   `added_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `active` tinyint(4) NOT NULL DEFAULT '1',
+  `status` enum('ok','edited','deleted') NOT NULL DEFAULT 'ok',
   `payer` bigint(20) NOT NULL,
   `house_id` int(10) unsigned NOT NULL,
   `date` date NOT NULL,
@@ -174,9 +174,9 @@ CREATE TABLE IF NOT EXISTS `purchases` (
   `deleted_by` bigint(20) DEFAULT NULL,
   `split_type` enum('even','custom') NOT NULL COMMENT 'Split Type used when adding purchase - "Even Split" or "Custom Split"?',
   `edit_parent` int(10) unsigned DEFAULT NULL COMMENT 'Purchase from which this edit derives',
-  `edit_generation` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '0=current version,1=older,2=even older',
+  `edit_child` int(10) unsigned DEFAULT NULL COMMENT '0=current version,1=older,2=even older',
   PRIMARY KEY (`purchase_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
 
 -- --------------------------------------------------------
 
@@ -220,9 +220,10 @@ CREATE TABLE IF NOT EXISTS `users` (
   `conf_purchases_order` enum('asc','desc') NOT NULL DEFAULT 'asc',
   `conf_purchases_order_by` enum('date','added_time') NOT NULL DEFAULT 'date',
   `conf_seensettings` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'set to 1 when settings updated, 0 until then',
+  `conf_landingpage` enum('home','newpurchase','purchase') NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id_facebook` (`user_id_facebook`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='User Details' AUTO_INCREMENT=5 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='User Details' AUTO_INCREMENT=3 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

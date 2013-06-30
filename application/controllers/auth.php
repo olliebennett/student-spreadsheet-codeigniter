@@ -13,6 +13,9 @@ class Auth extends CI_Controller {
 		$this->user = $this->users_model->getUser(FALSE, FALSE, FALSE); // do not force login, registration, or refresh
 		//d($this->user, '$this->user');
 
+		// Save user ID in session (for future requests).
+		//$this->session->set_userdata('user_id_facebook', $this->user['user_id_facebook']);
+
 	    if (ENVIRONMENT == 'development') {
 	      $this->output->enable_profiler(true);
 	    }

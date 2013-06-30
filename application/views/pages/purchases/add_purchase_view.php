@@ -11,7 +11,7 @@
 
 <?php
 function form_err($err) {
-    return '<div class="text-error">'.$err.'</div>';
+    return '<div class="alert alert-error">'.$err.'</div>';
 }
 // TODO - print errors next to the appropriate field, instead of all at top
 if (isset($error) && is_array($error)) {
@@ -86,11 +86,29 @@ if (isset($error) && is_array($error)) {
       </div>
   	</div>
     <div class="control-group">
-      <label class="control-label" for="payees">Payers</label>
+      <label class="control-label" for="payees">Payees</label>
       <div class="controls">
+
 <?php foreach ($housemates as $housemate) : ?>
+<?php
+// Determine whether or not to check this housemate by default
+$checked = FALSE;
+//(isset($repop['split_type']) && $repop['split_type'] == 'even' && isset($repop['payees']) && is_array($repop['payees']) && in_array($housemate['user_id'], array_values($repop['payees']))) {
+if (isset($repop['split_type'])) {
+  if ($repop['split_type'] == 'even') {
+    if (isset($repop['payees']) && is_array($repop['payees'])) {
+      if (in_array($housemate['user_id'], array_values($repop['payees']))) {
+          $checked = TRUE;
+      }
+    }
+  }
+} else {
+  // check all housemates by default
+  $checked = TRUE;
+}
+?>
       <label class="checkbox inline">
-        <input type="checkbox" name="payees[]" id="check_<?php echo $housemate['user_id']; ?>" value="<?php echo $housemate['user_id']; ?>"<?php echo (isset($repop['split_type']) && $repop['split_type'] == 'even' && isset($repop['payees']) && is_array($repop['payees']) && in_array($housemate['user_id'], array_keys($repop['payees'])) ? ' checked="checked"' : '') ?>> <?php echo $housemate['user_name']; ?>
+        <input type="checkbox" name="payees[]" id="check_<?php echo $housemate['user_id']; ?>" value="<?php echo $housemate['user_id']; ?>"<?php echo ($checked ? ' checked="checked"' : '') ?>> <?php echo $housemate['user_name']; ?>
       </label>
  <?php endforeach; ?>
       </div>
@@ -109,7 +127,7 @@ if (isset($error) && is_array($error)) {
     <div class="controls">
       <div class="input-prepend">
         <label for="price_custom_<?php echo $housemate['user_id']; ?>">
-          <span class="add-on">£</span><input class="input-mini" type="text" name="price_custom[<?php echo $housemate['user_id']; ?>]" id="price_custom_<?php echo $housemate['user_id']; ?>" placeholder="0.00" value="<?php echo (isset($repop['payees'][$housemate['user_id']]) ? number_format($repop['payees'][$housemate['user_id']], 2) : ''); ?>" />
+          <span class="add-on">£</span><input class="input-mini" type="text" name="price_custom[<?php echo $housemate['user_id']; ?>]" id="price_custom_<?php echo $housemate['user_id']; ?>" placeholder="0.00" value="<?php echo (isset($repop['price_custom'][$housemate['user_id']]) ? number_format((double)$repop['price_custom'][$housemate['user_id']], 2) : ''); ?>" />
         </label>
       </div>
     </div>

@@ -1,1 +1,0 @@
-this is inside the items_view.php file.

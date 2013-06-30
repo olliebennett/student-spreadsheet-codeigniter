@@ -1,6 +1,6 @@
 <?php $this->load->view('includes/header_view'); ?>
 
-<?php foreach (array('success', 'error', 'info') as $alert_type) : ?>
+<?php foreach (array('success', 'error', 'info', 'warning') as $alert_type) : ?>
 <?php if ($this->session->flashdata($alert_type)) : ?> 
         <div class="alert alert-<?php echo $alert_type; ?>">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -12,7 +12,7 @@
 <?php endif ?>
 <?php endforeach; ?>
 
-<h2><?php echo isset($title) ? $title : ucfirst($this->uri->segment(1, 'home')); ?></h2>
+<h2><?php echo isset($title) ? $title : ucfirst($this->uri->segment(1, 'Home')); ?></h2>
 
 <?php if (isset($subnav)) : ?>
     <p>

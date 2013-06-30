@@ -39,11 +39,11 @@ foreach ($housemates as $housemate) {
 
 <?php $colspan = 4 + count($housemates); ?>
 <?php foreach ($purchases as $purchase_id => $purchase) : ?>
-	<tr class="purchase-overview">
+	<tr class="purchase-overview<?php echo ($purchase['status'] == 'deleted') ? ' error' : ''; ?>">
 		<td><?php echo $purchase['date']; ?></td>
 		<td><?php echo $purchase['description']; ?></td>
 		<td><?php echo $housemate_name[$purchase['payer']]; ?></td>
-		<td>£ <?php echo number_format($purchase['total_price'], 2); ?></td>
+		<td><?php echo render_price($purchase['total_price']); ?></td>
 <?php foreach ($housemates as $housemate) : ?>
 	<td>£ <?php echo number_format((isset($purchase['payees'][$housemate['user_id']]) ? $purchase['payees'][$housemate['user_id']] : '0'), 2); ?></td>
 <?php endforeach; ?>
@@ -51,19 +51,31 @@ foreach ($housemates as $housemate) {
 	<tr class="purchase-details warning" data-id="<?php echo $purchase_id; ?>">
 		<td colspan="<?php echo $colspan; ?>">
 			<span class="pull-left">
-			Added <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($purchase['added_time'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($purchase['added_time'])); ?></time> by <?php echo ($user['user_id'] == $purchase['added_by']) ? '<em>you</em>' : $housemate_name[$purchase['added_by']]; ?>.
-			(<?php //echo $purchase['comment_count'] . ' ' . ($purchase['comment_count'] == 1 ? 'comment' : 'comments'); ?>)
+<?php if ($purchase['status'] == 'deleted') : ?>
+<span class="text-error">
+  Deleted <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($purchase['deleted_time'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($purchase['deleted_time'])); ?></time> by <?php echo ($user['user_id'] == $purchase['deleted_by']) ? '<em>you</em>' : $housemate_name[$purchase['deleted_by']]; ?>.
+</span>
+<?php else : // not deleted ?>
+Added <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($purchase['added_time'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($purchase['added_time'])); ?></time> by <?php echo ($user['user_id'] == $purchase['added_by']) ? '<em>you</em>' : $housemate_name[$purchase['added_by']]; ?>.
+        (<?php //echo $purchase['comment_count'] . ' ' . ($purchase['comment_count'] == 1 ? 'comment' : 'comments'); ?>)
+<?php endif; // deleted ?>
 			</span>
 			<span class="pull-right">
-			<?php echo anchor('purchases/view/'.$purchase_id, '<i class="icon-eye-open"></i> view'); ?>
-			<?php echo anchor('purchases/edit/'.$purchase_id, '<i class="icon-edit"></i> edit'); ?>
-			<?php echo anchor('purchases/dispute/'.$purchase_id, '<i class="icon-legal"></i> dispute'); ?>
-			<?php echo anchor('purchases/delete/'.$purchase_id, '<i class="icon-remove"></i> delete'); ?>
-			<?php echo anchor('purchases/undelete/'.$purchase_id, '<i class="icon-undo"></i> undelete'); ?>
-			<?php echo anchor('purchases/comment/'.$purchase_id, '<i class="icon-comment"></i> comment'); ?>
+        <?php echo anchor('purchases/view/'.$purchase_id, '<i class="icon-eye-open"></i> view'); ?>
+<?php if ($purchase['status'] == 'ok') : ?> 
+        <?php echo anchor('purchases/edit/'.$purchase_id, '<i class="icon-edit"></i> edit'); ?>
+        <?php echo anchor('purchases/dispute/'.$purchase_id, '<i class="icon-legal"></i> dispute'); ?>
+        <?php echo anchor('purchases/delete/'.$purchase_id, '<i class="icon-remove"></i> delete'); ?>
+        <?php echo anchor('purchases/comment/'.$purchase_id, '<i class="icon-comment"></i> comment'); ?>
+<?php elseif ($purchase['status'] == 'deleted') : ?> 
+        <?php echo anchor('purchases/restore/'.$purchase_id, '<i class="icon-undo"></i> restore'); ?>
+<?php endif; ?>
 			</span>
 		</td>
 	</tr>
+
+
+
 <?php endforeach; ?>
 
 </tbody>

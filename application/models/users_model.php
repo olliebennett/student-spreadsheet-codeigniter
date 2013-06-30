@@ -4,7 +4,12 @@ class Users_model extends CI_Model {
 
 	function getUser($forceLogin = TRUE, $forceRegister = TRUE, $forceFacebookRefresh = FALSE) {
 
-		// Override when offline
+    // Log in automatically if in DEMO mode
+		if ($this->config->item('stsp_demo')) {
+      return $this->getUserByFacebookId('504850777'); // TODO - use a sample user.
+    }
+    
+    // Override when offline
 		//return $this->getUserByFacebookId(504850777);
 
 		$this->load->library('HybridAuthLib');
@@ -15,9 +20,13 @@ class Users_model extends CI_Model {
 		//die();
 		//if ($user_id_facebook !== FALSE)
 
+
 		if (!$user_id_facebook || $forceFacebookRefresh) {
 
-			if (!$forceLogin) {
+			if ($forceLogin) {
+				$this->session->set_flashdata('error', 'You must login first.');
+				redirect('auth');				
+			} else {
 				return NULL;
 			}
 
@@ -29,7 +38,7 @@ class Users_model extends CI_Model {
 			if (!$isUserConnected && $forceRegister) {
 				//$this->session->set_flashdata('error', 'You must login first.');
 				//redirect('auth');
-				die('here - stopping');
+				die('problem when logging in.');
 			}
 
 			// Force user to authenticate

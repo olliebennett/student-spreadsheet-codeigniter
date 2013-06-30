@@ -13,16 +13,27 @@ class Purchases_model extends CI_Model {
      *
      * @return array of purchases
      */
-    function getPurchases($house_id)
+    function getPurchases($house_id, $opt = array())
     {
+
+        // Default options:
+        if (!isset($opt['show']) || !in_array($opt['show'], array('ok','deleted','edited'))) {
+            $opt['show'] = 'ok';
+        }
+        if (!isset($opt['order']) || !in_array($opt['order'], array('asc','desc'))) {
+            $opt['order'] = 'desc';
+        }
+        if (!isset($opt['order_by']) || !in_array($opt['order_by'], array('added_time','date','purchase_id'))) {
+            $opt['order_by'] = 'added_time';
+        }
 
         // Get all purchase details
         $this->db->select('*');
         $this->db->from('purchases p');
         $this->db->join('link_purchases_users lpu', 'lpu.purchase_id = p.purchase_id');
         $this->db->where('p.house_id', $house_id);
-        $this->db->where('p.status', 'ok');
-        $this->db->order_by('p.added_time', 'desc');
+        $this->db->where('p.status', $opt['show']);
+        $this->db->order_by('p.' . $opt['order_by'], $opt['order']);
         $query = $this->db->get();
 
 
@@ -114,8 +125,9 @@ class Purchases_model extends CI_Model {
             $purchases[$row->purchase_id]['house_id']    = $row->house_id;
             $purchases[$row->purchase_id]['split_type']  = $row->split_type;
             $purchases[$row->purchase_id]['edit_parent']  = $row->edit_parent;
-            $purchases[$row->purchase_id]['edit_child']  = $row->edit_child;
-
+            $purchases[$row->purchase_id]['edit_child']   = $row->edit_child;
+            $purchases[$row->purchase_id]['deleted_by']   = $row->deleted_by;
+            $purchases[$row->purchase_id]['deleted_time'] = $row->deleted_time;
 
             // Price this payee must contribute
             $purchases[$row->purchase_id]['payees'][$row->user_id] = $row->price;
@@ -185,8 +197,6 @@ class Purchases_model extends CI_Model {
         if (isset($data['edit_parent'])) {
             // Deactivate (i.e. "delete") old purchase.
             $p_old_data = array(
-                //'deleted_time' => date("Y-m-d H:i:s"), // NOW()
-                //'deleted_by' => $user_id,
                 'status' => 'edited',
                 'edit_child' => $purchase_id
             );
@@ -202,6 +212,32 @@ class Purchases_model extends CI_Model {
         }
         log_message('error', 'Transaction failed!');
         return false;
+    }
+
+    function deletePurchase($purchase_id, $user_id) {
+
+        $p_data = array(
+               'status' => 'deleted',
+               'deleted_by' => $user_id,
+               'deleted_time' => date("Y-m-d H:i:s"), // NOW()
+            );
+
+        $this->db->where('purchase_id', $purchase_id);
+        return $this->db->update('purchases', $p_data);
+
+    }
+
+    function restorePurchase($purchase_id) {
+
+        $p_data = array(
+               'status' => 'ok',
+               'deleted_by' => NULL,
+               'deleted_time' => NULL, // NOW()
+            );
+
+        $this->db->where('purchase_id', $purchase_id);
+        return $this->db->update('purchases', $p_data);
+
     }
 
     function addComment($user_id, $purchase_id, $text, $type) {

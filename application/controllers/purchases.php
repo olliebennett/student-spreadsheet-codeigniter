@@ -25,9 +25,16 @@ class Purchases extends CI_Controller {
   // Index: All Purchases
   function index() {
 
+    // Check requirements
+    $opt = array();
+    if ($this->input->get('show') == 'deleted') {
+      $opt['show'] = 'deleted';
+    }
+
     // Get all purchases
     $data['purchases'] = $this->purchases_model->getPurchases(
-      $this->user['house_id']
+      $this->user['house_id'],
+      $opt
     );
 
     // Calculate housemate balances
@@ -95,7 +102,7 @@ class Purchases extends CI_Controller {
         if ($purchase_id != FALSE) {
 
           // Add comment to database (if any)
-          d($data['purchase_details']['comment'], 'data-comment');
+          //d($data['purchase_details']['comment'], 'data-comment');
           if ($data['purchase_details']['comment'] != '') {
             // TODO - what happens when adding comment fails?
             $this->comments_model->addComment($purchase_id, $data['purchase_details']['comment'], $this->user['user_id']);
@@ -251,9 +258,6 @@ class Purchases extends CI_Controller {
             
     } while ($next_purchase_id != NULL);
 
-    //d($p,'p');
-    //die();
-
     // Check that (at least) one purchase was found
     if (count($data['purchases']) == 0) {
       $this->session->set_flashdata('error', 'No purchase found with this ID.');
@@ -263,35 +267,91 @@ class Purchases extends CI_Controller {
     // Sort the array by its keys
     ksort($data['purchases']);
 
-    // Check that user has access to view this purchase
-    // if (!in_array($this->user->id, array(
-    //   $data['purchase']['payee'],
-    //   $data['purchase']['payer'],
-    //   $data['purchase'][]
-    //   ))) {
-    //   $this->session->set_flashdata('error', 'You do not have permission to view this purchase.');
-    //   redirect('purchases');
-    // }
-
-    // TODO - Define permissions for what user may do
-
-    // Comments
-    //$this->load->model('comments_model');
-    //$data['purchases']['comments'] = $this->comments_model->getComments($id);
-
-    // TODO - History of purchase: comments/edits/disputes
-
     // Detect required format, and send to view
     if (strtolower($this->input->get('format')) === 'json') {
       $this->load->helper('json_helper');
       output_json($data);
     } else {
-      $data['title'] = 'View Purchase';
+      $data['title'] = 'Purchase Details';
       $data['view'] = 'purchases/view_purchase';
       $data['user'] = $this->user;
       $data['housemates'] = $this->housemates;
       //$this->load->library('table');
       $this->load->view('template', $data);
+    }
+
+  }
+
+  function restore($purchase_id = NULL) {
+
+    if ($purchase_id == NULL) {
+      $this->session->set_flashdata('error', 'No purchase specified to be restored.');
+      redirect("purchases");
+    }
+
+    // Get Purchase info
+    $purchase = $this->purchases_model->getPurchaseById($purchase_id);
+
+    // Verify purchase exists and user has permission.
+    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id], $this->user['user_id'])) {
+      $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
+      redirect("purchases");
+    }
+
+    // Verify purchase exists and user has permission.
+    if (!$this->_userCanModify($purchase[$purchase_id], $this->user['user_id'])) {
+      $this->session->set_flashdata('error', 'Only the creator or payer can restore a purchase.');
+      redirect("purchases/view/$purchase_id");
+    }
+
+    if ($purchase[$purchase_id]['status'] != 'deleted') {
+      $this->session->set_flashdata('info', 'This purchase has not been deleted.');
+      redirect("purchases/view/$purchase_id");
+    }
+
+    if ($this->purchases_model->restorePurchase($purchase_id, $this->user['user_id'])) {
+      $this->session->set_flashdata('success', 'Purchase restored.');
+      redirect("purchases/view/$purchase_id");
+    } else {
+      $this->session->set_flashdata('error', 'Purchase could not be restored. Please try again later.');
+      redirect("purchases/view/$purchase_id");
+    }
+
+  }
+
+  function delete($purchase_id = NULL) {
+
+    if ($purchase_id == NULL) {
+      $this->session->set_flashdata('error', 'No purchase specified for deletion.');
+      redirect("purchases");
+    }
+
+    // Get Purchase info
+    $purchase = $this->purchases_model->getPurchaseById($purchase_id);
+
+    // Verify purchase exists and user has permission.
+    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id], $this->user['user_id'])) {
+      $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
+      redirect("purchases");
+    }
+
+    // Verify purchase exists and user has permission.
+    if (!$this->_userCanModify($purchase[$purchase_id], $this->user['user_id'])) {
+      $this->session->set_flashdata('error', 'Only the creator or payer can delete a purchase.');
+      redirect("purchases/view/$purchase_id");
+    }
+
+    if ($purchase[$purchase_id]['status'] == 'deleted') {
+      $this->session->set_flashdata('info', 'This purchase is not been deleted, so cannot be restored.');
+      redirect("purchases/view/$purchase_id");
+    }
+
+    if ($this->purchases_model->deletePurchase($purchase_id, $this->user['user_id'])) {
+      $this->session->set_flashdata('success', 'Purchase deleted. View it <a href="' . site_url("purchases/view/$purchase_id") . '">here</a> or <a href="' . site_url("purchases/restore/$purchase_id") . '">restore it</a> now.');
+      redirect("purchases");
+    } else {
+      $this->session->set_flashdata('error', 'Purchase could not be deleted. Please try again later.');
+      redirect("purchases/view/$purchase_id");
     }
 
   }
@@ -347,7 +407,7 @@ class Purchases extends CI_Controller {
     );
 
     // Calculate housemate balances
-    $balances = $this->getBalances($data['purchases']);
+    $balances = $this->_getBalances($data['purchases']);
 
     // work on a copy of original balances
     $balances_after = $balances;

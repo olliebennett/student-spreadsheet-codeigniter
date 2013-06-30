@@ -8,13 +8,20 @@
 
 <?php if (count($purchases) == 0) : ?>
 
-<p class="warn">No purchases found. Add one <a href="<?php echo site_url('purchases/add'); ?>">here</a>.</p>
+<?php if ($this->input->get('show') == 'deleted') : ?>
+<p class="warn">No <b>deleted</b> purchases found. Show <a href="<?php echo site_url('purchases'); ?>">active</a> purchases?</p>
+<?php else : ?>
+<p class="warn">No purchases found. Add one <a href="<?php echo site_url('purchases/add'); ?>">here</a>, or view <a href="<?php echo site_url('purchases?show=deleted'); ?>">deleted</a> purchases.</p>
+<?php endif; // no purchases ?>
 
 <p>Purchases are specific to your active house (currently "<strong><?php echo $houses[$user['house_id']]['house_name']; ?></strong>"). If you expected to see purchases here, and are members of other houses, review your <a href="<?php echo site_url('settings'); ?>">settings</a>.</p>
 
 <?php else : ?>
 
-<p>Showing <!--# to # of --><?php echo count($purchases); ?> purchases.</p>
+<p>Showing <!--# to # of --><?php echo count($purchases); ?>
+<?php echo ($this->input->get('show') == 'deleted') ? ' <b>deleted</b>' : ''; ?>
+<?php echo (count($purchases) == 1) ? ' purchase' : ' purchases'; ?>
+.</p>
 
 <?php $this->load->view('pages/purchases/includes/table.php'); ?>
 
@@ -31,6 +38,13 @@
   </ul>
 </div>
 -->
+
+<p><a href="<?php echo site_url('purchases/add'); ?>">Add new purchase</a> | <?php if ($this->input->get('show') != 'deleted') : ?>
+<a href="<?php echo site_url('purchases?show=deleted'); ?>">Show deleted purchases</a>
+<?php else :?>
+<a href="<?php echo site_url('purchases'); ?>">Show active purchases</a>
+<?php endif; // not showing deleted purchases ?>
+</p>
 
 <h3>Balances</h3>
 

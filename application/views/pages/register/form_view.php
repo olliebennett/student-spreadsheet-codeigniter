@@ -15,7 +15,7 @@
 <div class="control-group">
   <label class="control-label" for="register-select">Friends</label>
   <div class="controls">
-      <select multiple="" class="span3" placeholder="Select Friends" name="register[]" id="register-select" tabindex="-1">
+      <select multiple="" class="span3" placeholder="Select Friends" name="register[]" id="register-select">
 <?php foreach ($fb_friends as $fb_friend_id => $fb_friend_name) : ?>
         <option value="<?php echo $fb_friend_id; ?>"><?php echo $fb_friend_name; ?></option>
 <?php endforeach; ?>

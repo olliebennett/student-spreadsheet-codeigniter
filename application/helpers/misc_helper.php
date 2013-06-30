@@ -66,10 +66,10 @@ function render_price($val, $cur = '&#163;')
     return 'NaN';
   }
 
-  $pounds = intval(abs($val));
+  $pounds = number_format(abs($val), 0, '.', ',');
   $pence = substr(round(abs($val)*100%100) . '00', 0, 2);
 
-  return ((abs($val) < 0.005) ? '' : ($val < 0 ? '-' : '<!--+-->')) . '&nbsp;' . $cur . '&nbsp;' . '<span class="price_pounds">' . $pounds . '</span>.<span class="price_pence">' . $pence . '</span>';
+  return ((abs($val) < 0.005) ? '' : ($val < 0 ? '-' : '<!--+-->')) . '&nbsp;' . $cur . '&nbsp;' . '<span class="cur_units">' . $pounds . '</span>.<span class="cur_decimals">' . $pence . '</span>';
 
 }
 
