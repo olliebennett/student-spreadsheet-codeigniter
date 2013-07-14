@@ -17,12 +17,14 @@
 
 <p>This purchase was added using <?php echo ($purchase['split_type'] == 'even') ? 'an <em>even</em>' : (($purchase['split_type'] == 'custom') ? 'a <em>custom</em>' : 'an <b>UNKNOWN</b>'); ?> split. <?php echo helptip('When adding purchases, the price can be split either evenly between payers, or manually.'); ?></p>
 
+<?php if (isset($purchase['perm_userCanModify']) && $purchase['perm_userCanModify'] === TRUE) : ?>
 <a href="<?php echo site_url('purchases/edit/'.$purchase_id, 'Edit'); ?>" class="btn btn-primary" ><i class="icon-edit"></i> Edit Purchase</a>
 <?php if ($purchase['status'] == 'deleted') : ?>
 <a href="<?php echo site_url('purchases/restore/'.$purchase_id, 'Restore'); ?>" class="btn btn-success"><i class="icon-undo"></i> Restore Purchase</a>
 <?php else : ?>
 <a href="<?php echo site_url('purchases/delete/'.$purchase_id, 'Delete'); ?>" class="btn btn-danger" ><i class="icon-remove"></i> Delete Purchase</a>
 <?php endif; // deleted ?>
+<?php endif; // userCanModify ?>
 
 <h3>Purchase History and Comments</h3>
 

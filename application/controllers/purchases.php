@@ -25,17 +25,27 @@ class Purchases extends CI_Controller {
   // Index: All Purchases
   function index() {
 
-    // Check requirements
+    // Options
+    // by default, use GET parameters,
+    // otherwise use user's setting or sys default.
     $opt = array();
-    if ($this->input->get('show') == 'deleted') {
-      $opt['show'] = 'deleted';
-    }
+    $opt_user = $this->user['conf'];
+    // show - deleted or all purchases
+    $opt['show'] = ($this->input->get('show') == 'deleted') ? 'deleted' : 'ok';
+    // user purchase display options
+    $opt['order'] = ($this->input->get('order')) ? $this->input->get('order') : $opt_user['purchases_order'];
+    $opt['order_by'] = ($this->input->get('order_by')) ? $this->input->get('order_by') : $opt_user['purchases_order_by'];
 
     // Get all purchases
     $data['purchases'] = $this->purchases_model->getPurchases(
       $this->user['house_id'],
       $opt
     );
+
+    // Add purchase permissions
+    foreach ($data['purchases'] as $pid => $p) {
+      $data['purchases'][$pid]['perm_userCanModify'] = $this->_userCanModify($p);
+    }
 
     // Calculate housemate balances
     $data['balances'] = $this->_getBalances($data['purchases']);
@@ -44,6 +54,7 @@ class Purchases extends CI_Controller {
     $data['user'] = $this->user;
     $data['housemates'] = $this->housemates;
     $data['houses'] = $this->houses;
+    $data['options'] = $opt;
     $this->load->view('template', $data);
 
   }
@@ -161,6 +172,16 @@ class Purchases extends CI_Controller {
       $this->session->set_flashdata('error', 'No purchase found with this ID.');
       redirect('purchases');
     }
+
+    
+    if (FALSE == $this->_userCanView($p[$purchase_id])) {
+      $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
+      redirect('purchases');
+    }
+    if (FALSE == $this->_userCanModify(reset($p))) {
+      $this->session->set_flashdata('error', 'Only the creator or payer can edit a purchase.');
+      redirect("purchases/view/$purchase_id");
+    }
     
     // Do not allow editing of deleted purchases or old versions
     if ($p[$purchase_id]['status'] == 'deleted') {
@@ -222,7 +243,7 @@ class Purchases extends CI_Controller {
       //d($next_purchase, 'next purchase');
       
       // Was purchase found, and has user got permission to view it?
-      if ($next_purchase === FALSE || FALSE == $this->_userCanView($next_purchase[$next_purchase_id], $this->user['user_id'])) {
+      if ($next_purchase === FALSE || FALSE == $this->_userCanView($next_purchase[$next_purchase_id])) {
         $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
         redirect('purchases');
       }
@@ -267,6 +288,11 @@ class Purchases extends CI_Controller {
     // Sort the array by its keys
     ksort($data['purchases']);
 
+    // Add permissions information
+    foreach ($data['purchases'] as $pid => $p) {
+      $data['purchases'][$pid]['perm_userCanModify'] = $this->_userCanModify($p);
+    }
+
     // Detect required format, and send to view
     if (strtolower($this->input->get('format')) === 'json') {
       $this->load->helper('json_helper');
@@ -276,7 +302,6 @@ class Purchases extends CI_Controller {
       $data['view'] = 'purchases/view_purchase';
       $data['user'] = $this->user;
       $data['housemates'] = $this->housemates;
-      //$this->load->library('table');
       $this->load->view('template', $data);
     }
 
@@ -293,13 +318,13 @@ class Purchases extends CI_Controller {
     $purchase = $this->purchases_model->getPurchaseById($purchase_id);
 
     // Verify purchase exists and user has permission.
-    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id], $this->user['user_id'])) {
+    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id])) {
       $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
       redirect("purchases");
     }
 
     // Verify purchase exists and user has permission.
-    if (!$this->_userCanModify($purchase[$purchase_id], $this->user['user_id'])) {
+    if (!$this->_userCanModify(reset($purchase))) {
       $this->session->set_flashdata('error', 'Only the creator or payer can restore a purchase.');
       redirect("purchases/view/$purchase_id");
     }
@@ -330,13 +355,13 @@ class Purchases extends CI_Controller {
     $purchase = $this->purchases_model->getPurchaseById($purchase_id);
 
     // Verify purchase exists and user has permission.
-    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id], $this->user['user_id'])) {
+    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id])) {
       $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
       redirect("purchases");
     }
 
     // Verify purchase exists and user has permission.
-    if (!$this->_userCanModify($purchase[$purchase_id], $this->user['user_id'])) {
+    if (!$this->_userCanModify($purchase[$purchase_id])) {
       $this->session->set_flashdata('error', 'Only the creator or payer can delete a purchase.');
       redirect("purchases/view/$purchase_id");
     }
@@ -370,7 +395,7 @@ class Purchases extends CI_Controller {
     $purchase = $this->purchases_model->getPurchaseById($purchase_id);
 
     // Verify purchase exists and user has permission.
-    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id], $this->user['user_id'])) {
+    if ($purchase == FALSE || !$this->_userCanView($purchase[$purchase_id])) {
       $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
       redirect("purchases");
     }
@@ -707,13 +732,13 @@ class Purchases extends CI_Controller {
 
   }
   
-  function _userCanModify($purchase, $user_id) {
+  function _userCanModify($purchase) {
     
-    if ($user_id == $purchase['added_by']) {
+    if ($this->user['user_id'] == $purchase['added_by']) {
       return TRUE;
     }
     
-    if ($user_id == $purchase['payer']) {
+    if ($this->user['user_id'] == $purchase['payer']) {
       return TRUE;
     }
     
@@ -721,13 +746,18 @@ class Purchases extends CI_Controller {
     
   }
   
-  function _userCanView($purchase, $user_id) {
+  function _userCanView($purchase) {
     
-    if ($this->_userCanModify($purchase, $user_id)) {
+    if ($this->_userCanModify($purchase)) {
       return TRUE;
     }
     
-    if (in_array($user_id, array_keys($purchase['payees']))) {
+    if (in_array($this->user['user_id'], array_keys($purchase['payees']))) {
+      return TRUE;
+    }
+
+    // Did a housemate add it?
+    if (in_array($purchase['added_by'], array_keys($this->housemates))) {
       return TRUE;
     }
     

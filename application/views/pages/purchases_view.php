@@ -20,8 +20,8 @@
 
 <p>Showing <!--# to # of --><?php echo count($purchases); ?>
 <?php echo ($this->input->get('show') == 'deleted') ? ' <b>deleted</b>' : ''; ?>
-<?php echo (count($purchases) == 1) ? ' purchase' : ' purchases'; ?>
-.</p>
+<?php echo (count($purchases) == 1) ? ' purchase' : ' purchases'; ?>,
+<small>ordered by <?php echo ($options['order'] == 'asc') ? 'acsending' : 'descending'; ?> <?php echo $options['order_by']; ?></small>.</p>
 
 <?php $this->load->view('pages/purchases/includes/table.php'); ?>
 

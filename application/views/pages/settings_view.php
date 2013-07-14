@@ -97,7 +97,7 @@
         <span class="help-inline"> order.</span>
       </div>
     </div>
-
+<!--
     <div class="control-group">
       <label class="control-label" for="purchases_per_page">Paging</label>
       <div class="controls">
@@ -110,9 +110,10 @@
         <span class="help-inline">purchases per page.</span>
       </div>
     </div>
-
+-->
   </fieldset>
 
+<!--
 
   <fieldset>
 
@@ -130,7 +131,6 @@
         <div class="input-prepend">
           <span class="add-on"><i class="icon-envelope"></i></span>
           <input class="span2" id="user_email" name="user_email" type="email" placeholder="ollie@stsp.info" value="<?php echo (isset($repop['user_email']) ? $repop['user_email'] : (isset($user['user_email']) ? $user['user_email'] : '')); ?>">>
-          <!--<input class="span2" id="user_email" type="email" placeholder="ollie@stsp.info" -->
         </div>
 <?php if (($user['user_email_facebook'] != '') && ($user['user_email_facebook'] != $user['user_email'])) : ?>
         <span class="help-inline" id="fb_email_hint"> <i class="icon-caret-left"></i> <a href="#" id="fb_email_fill"><?php echo $user['user_email_facebook']; ?></a> <?php echo helptip('Email address retrieved from Facebook.', 'right'); ?></span>
@@ -145,22 +145,12 @@
       </div>
     </div>
 
-<!--
-    <div class="pagination">
-  <ul>
-    <li><a href="#"><i class="icon-envelope"></i></a></li>
-    <li><a href="#">3</a></li>
-    <li><a href="#">4</a></li>
-  </ul>
-</div>
--->
-
     <div class="control-group">
       <label class="control-label" for="user_mobile">Mobile Number</label>
       <div class="controls">
         <div class="input-prepend">
           <span class="add-on"><i class="icon-phone"></i></span>
-          <input class="span2" id="user_mobile" name="user_mobile" type="text" placeholder="+44 7851 384 611" value="<?php
+          <input class="span2" id="user_mobile" name="user_mobile" type="text" placeholder="+44 7000 000 000" value="<?php
 if (isset($repop['user_mobile'])) {
   echo $repop['user_mobile'];
 } elseif (isset($user['user_mobile'])) {
@@ -173,49 +163,6 @@ if (isset($repop['user_mobile'])) {
         <span class="help-inline"><?php echo helptip('Enter a number beginning \'+447\' or \'07\'. Only UK mobile numbers are currently supported.', 'right'); ?></span>
       </div>
     </div>
-<!--
-    <div class="control-group">
-      <div class="controls">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Notification</th>
-              <th>Email</th>
-              <th>SMS</th>
-              <th>Web</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>A purchase is <strong>added</strong> by a housemate:</td>
-              <td>
-                <label class="checkbox inline">
-                  <i class="icon-envelope"></i><input type="checkbox" name="notification[added][email]" id="abc1">
-                </label>
-              </td>
-              <td>
-                <label class="checkbox inline">
-                  <input type="checkbox" name="notification[added][sms]" id="abc1"> <i class="icon-phone"></i>
-                </label>
-              </td>
-              <td>
-                <label class="checkbox inline">
-                  <input type="checkbox" name="notification[added][web]" id="abc1"> <i class="icon-globe"></i>
-                </label>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="4">
-                * Read about notifications on the <a href="#notifications">help page</a>.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  -->
-
 
     <div class="control-group">
       <div class="controls">
@@ -248,6 +195,8 @@ if (isset($repop['user_mobile'])) {
     </div>
 
   </fieldset>
+
+-->
 
   <div class="control-group">
     <div class="controls">

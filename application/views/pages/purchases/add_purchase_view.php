@@ -97,7 +97,7 @@ $checked = FALSE;
 if (isset($repop['split_type'])) {
   if ($repop['split_type'] == 'even') {
     if (isset($repop['payees']) && is_array($repop['payees'])) {
-      if (in_array($housemate['user_id'], array_values($repop['payees']))) {
+      if (in_array($housemate['user_id'], array_keys($repop['payees']))) {
           $checked = TRUE;
       }
     }

@@ -46,7 +46,7 @@ foreach ($housemates as $housemate) {
 		<td><?php echo render_price($purchase['total_price']); ?></td>
 <?php foreach ($housemates as $housemate) : ?>
 	<td>£ <?php echo number_format((isset($purchase['payees'][$housemate['user_id']]) ? $purchase['payees'][$housemate['user_id']] : '0'), 2); ?></td>
-<?php endforeach; ?>
+<?php endforeach; // housemates ?>
 	</tr>
 	<tr class="purchase-details warning" data-id="<?php echo $purchase_id; ?>">
 		<td colspan="<?php echo $colspan; ?>">
@@ -62,21 +62,23 @@ Added <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', 
 			</span>
 			<span class="pull-right">
         <?php echo anchor('purchases/view/'.$purchase_id, '<i class="icon-eye-open"></i> view'); ?>
+<?php if (isset($purchase['perm_userCanModify']) && $purchase['perm_userCanModify'] === TRUE) : ?>
 <?php if ($purchase['status'] == 'ok') : ?> 
         <?php echo anchor('purchases/edit/'.$purchase_id, '<i class="icon-edit"></i> edit'); ?>
-        <?php echo anchor('purchases/dispute/'.$purchase_id, '<i class="icon-legal"></i> dispute'); ?>
         <?php echo anchor('purchases/delete/'.$purchase_id, '<i class="icon-remove"></i> delete'); ?>
-        <?php echo anchor('purchases/comment/'.$purchase_id, '<i class="icon-comment"></i> comment'); ?>
+        <!--<?php echo anchor('purchases/dispute/'.$purchase_id, '<i class="icon-legal"></i> dispute'); ?>-->
+        <!--<?php echo anchor('purchases/comment/'.$purchase_id, '<i class="icon-comment"></i> comment'); ?>-->
 <?php elseif ($purchase['status'] == 'deleted') : ?> 
         <?php echo anchor('purchases/restore/'.$purchase_id, '<i class="icon-undo"></i> restore'); ?>
-<?php endif; ?>
+<?php endif; // status OK ?>
+<?php endif; // userCanModify ?>
 			</span>
 		</td>
 	</tr>
 
 
 
-<?php endforeach; ?>
+<?php endforeach; // purchases ?>
 
 </tbody>
 </table><!-- #purchases -->
