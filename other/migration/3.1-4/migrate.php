@@ -24,8 +24,6 @@ if ($new->connect_errno) {
 	l("Connected to 'new' database on Host: <b>$new_host</b> | User: <b>$new_user</b> | DB: <b>$new_db</b>");
 }
 
-
-
 // Create fresh new database.
 $new_schema = file_get_contents('new_schema.sql');
 if (!$new->multi_query($new_schema)) {
@@ -134,10 +132,17 @@ if ($result = $old->query("SELECT * FROM `comments`")) {
 
 // New users
 h('Inserting users...');
+$i = 0;
 foreach ($users as $ufbid => $user) {
+
+	// Get usernames from facebook
+	//$fb = getFbNameFromId($ufbid);
+	$fb->first_name = 'firstname';
+	$fb->last_name = 'lastname';
+
 	$sql = "
-	INSERT INTO `users` (`user_id`, `user_id_facebook`, `house_id`, `user_name`)
-	VALUES ('".$user['migration_user_id']."','".$new->escape_string($user['user_id'])."','".$user['house_id']."','".$user['user_name']."');
+	INSERT INTO `users` (`user_id`, `user_id_facebook`, `house_id`, `user_name`, `user_name_first`, `user_name_last`)
+	VALUES ('".$user['migration_user_id']."','".$new->escape_string($user['user_id'])."','".$user['house_id']."','".$user['user_name']."','".$fb->first_name."','".$fb->last_name."');
 	";
 	if (!$result = $new->query($sql, MYSQLI_USE_RESULT)) {
 	    die("Could not insert user: (" . $new->errno . ") " . $new->error);
@@ -241,4 +246,9 @@ function l($str) {
 }
 function h($str) {
 	echo '<h2>' . $str . '</h2>' . "\n";
+}
+function getFbNameFromId($id) {
+	$fbJson = file_get_contents('http://graph.facebook.com/' . $id);
+	$fbObj = json_decode($fbJson);
+	return $fbObj;
 }
