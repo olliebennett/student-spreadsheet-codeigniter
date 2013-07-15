@@ -4,79 +4,81 @@ class Users_model extends CI_Model {
 
 	function getUser($forceLogin = TRUE, $forceRegister = TRUE, $forceFacebookRefresh = FALSE) {
 
-    // Log in automatically if in DEMO mode
+		// Log in automatically if in DEMO mode
 		if ($this->config->item('stsp_demo')) {
-      return $this->getUserByFacebookId('504850777'); // TODO - use a sample user.
-    }
-    
-    // Override when offline
-		//return $this->getUserByFacebookId(504850777);
+			return $this->getUserByFacebookId('504850777'); // TODO - use a sample user.
+		}
+
+		// Improve page load performance by preventing a request if possible:
+		// Check locally if user is logged in (has session)
+		$user_id_facebook = $this->session->userdata('user_id_facebook');
+		if ($user_id_facebook !== FALSE) {
+			
+			// check if user exists in db
+			$user = $this->getUserByFacebookId($user_id_facebook);
+			if ($user !== FALSE) {
+				return $user;
+			}
+		}
+
+		// User not found in local session - try the HybridAuth "slow way" ...
 
 		$this->load->library('HybridAuthLib');
 
-		// Check for user in session
-		$user_id_facebook = $this->session->userdata('user_id_facebook');
-		//d($user_id_facebook, 'session user_id_facebook');
-		//die();
-		//if ($user_id_facebook !== FALSE)
+		// Check whether user is connected with Facebook
+		// This will NOT force login (at this stage).
+		$isConnectedWithFacebook = $this->hybridauthlib->isConnectedWith('Facebook');
 
+		// Return null if user is not connected and we're not forcing them to login.
+		if (!$isConnectedWithFacebook && !$forceLogin && !$forceRegister) {
+			return NULL;
+		}
 
-		if (!$user_id_facebook || $forceFacebookRefresh) {
+		// We want remaining users to log in - get their details!
+		// (this will force a log-in if they're not already...)
+		$user_fb = $this->hybridauthlib->authenticate('Facebook')->getUserProfile();
 
-			if ($forceLogin) {
-				$this->session->set_flashdata('error', 'You must login first.');
-				redirect('auth');				
+		//d($user_fb,'user_fb');
+
+		// Update local session, to speed up next time
+		$this->session->set_userdata('user_id_facebook', $user_fb->identifier);
+		// This is also required if user is registering.
+		$this->session->set_userdata('user_name_facebook', $user_fb->displayName);		
+
+		// Check whether user has registered
+		$user = $this->getUserByFacebookId($user_fb->identifier);
+		if ($user === FALSE) {
+			
+			// User not yet registered
+
+			// Shall we force them to register?
+			if ($forceRegister) {
+				$this->session->set_flashdata('info', 'You are logged in. The final step is to register a house.');
+				redirect('register');
 			} else {
 				return NULL;
 			}
 
-			// Check whether user is connected with Facebook
-			// This will force login (if not already logged in) so will redirect to Facebook silently.
-			$isUserConnected = $this->hybridauthlib->authenticate('Facebook')->isUserConnected();
-
-			//var_dump($isUserConnected);
-			if (!$isUserConnected && $forceRegister) {
-				//$this->session->set_flashdata('error', 'You must login first.');
-				//redirect('auth');
-				die('problem when logging in.');
-			}
-
-			// Force user to authenticate
-			$user_fb = $this->getUserFacebookInfo();
-
-			$user_id_facebook = $user_fb->identifier;
-			$user_name_facebook = $user_fb->displayName;
-
-			// Update user session (for next time)
-			$this->session->set_userdata('user_id_facebook', $user_id_facebook);
-			$this->session->set_userdata('user_name_facebook', $user_name_facebook);
-
 		}
 
-		$user = $this->getUserByFacebookId($user_id_facebook);
-		if ($user == FALSE) {
-			// User not yet registered
-			if ($forceRegister) {
-				$this->session->set_flashdata('error', 'Facebook account <!--"' . $user_id_facebook . '"--> not recognised. Please register first.');
-				redirect('register');
-			} else {
-				// If available, compare Facebook details
-				// with stored user details and update as necessary
-				if (isset($user_fb)) {
-					$this->updateUserFacebookInfo($user_fb, $user);
-				}
-				return FALSE;
-			}
+		// User is logged in and registered!
 
+		// Update facebook info if required.
+		if ($forceFacebookRefresh) {
+			$this->updateUserFacebookInfo($user_fb, $user);
 		}
 
 		return $user;
 	}
 
+	/*
 	function getUserFacebookInfo () {
+		$this->load->library('HybridAuthLib');
 		return $this->hybridauthlib->authenticate('Facebook')->getUserProfile();
 		// identifier,webSiteURL,profileURL,photoURL,displayName,description,firstName,lastName,gender,language,age,birthDay,birthMonth,birthYear,email,emailVerified,phone,address,country,region,city,zip
 	}
+	*/
+
 
 	function updateUserFacebookInfo($user_facebook, $user_database) {
 
@@ -108,8 +110,8 @@ class Users_model extends CI_Model {
 			$data = array(
 				'user_name_facebook'  => $user_facebook->displayName,
 				'user_email_facebook' => $user_facebook->email,
-				'user_name_first'     => $user_facebook->firstName,
-				'user_name_last'      => $user_facebook->lastName
+				'user_name_first'	 => $user_facebook->firstName,
+				'user_name_last'	  => $user_facebook->lastName
 			);
 
 			$this->db->where('user_id', $user_database['user_id']);
@@ -206,78 +208,78 @@ class Users_model extends CI_Model {
 
 		// Find those users who already have accounts
 		$this->db->select('user_id, user_id_facebook, house_id');
-        foreach ($housemates as $housemate) {
-        	// TODO - it is probably nicer to use a subquery here.
-        	$this->db->or_where('user_id_facebook', $housemate['user_id_facebook']);
-        }
-        $query = $this->db->get('users');
+		foreach ($housemates as $housemate) {
+			// TODO - it is probably nicer to use a subquery here.
+			$this->db->or_where('user_id_facebook', $housemate['user_id_facebook']);
+		}
+		$query = $this->db->get('users');
 		foreach ($query->result() as $row) {
-		    for ($i = 0; $i < count($housemates); $i++) {
-		    	if ($housemates[$i]['user_id_facebook'] == $row->user_id_facebook) {
-		    		$housemates[$i]['user_id'] = $row->user_id;
-		    		$housemates[$i]['house_id'] = $row->house_id;
-		    		break; // end "for" loop
-		    	}
-		    }
+			for ($i = 0; $i < count($housemates); $i++) {
+				if ($housemates[$i]['user_id_facebook'] == $row->user_id_facebook) {
+					$housemates[$i]['user_id'] = $row->user_id;
+					$housemates[$i]['house_id'] = $row->house_id;
+					break; // end "for" loop
+				}
+			}
 		}
 
-        // Create those users that don't already exist
+		// Create those users that don't already exist
 		for ($i = 0; $i < count($housemates); $i++) {
-        	if (!isset($housemates[$i]['user_id'])) {
-        		// user not in database
-        		$this->db->insert('users', array(
-        			'user_id_facebook' => $housemates[$i]['user_id_facebook'],
-        			'user_name_facebook' => $housemates[$i]['user_name_facebook'],
-        			'user_name' => $housemates[$i]['user_name_facebook'] // Update locally stored username too
-        		));
-        		// TODO - These inserts could be "batched", but that adds complexity
+			if (!isset($housemates[$i]['user_id'])) {
+				// user not in database
+				$this->db->insert('users', array(
+					'user_id_facebook' => $housemates[$i]['user_id_facebook'],
+					'user_name_facebook' => $housemates[$i]['user_name_facebook'],
+					'user_name' => $housemates[$i]['user_name_facebook'] // Update locally stored username too
+				));
+				// TODO - These inserts could be "batched", but that adds complexity
 				$housemates[$i]['user_id'] = $this->db->insert_id();
-        	}
-        }
+			}
+		}
 
 		// Create house
-        $this->db->trans_start(); // start transaction
-        $this->db->insert('houses', array(
-        	'house_name' => $housename,
-        	'house_created_by' => $housemates[0]['user_id'],
-        	'house_joined' => date("Y-m-d H:i:s") // NOW()
-        	));
-        $house_id = $this->db->insert_id(); // get created house id
+		$this->db->trans_start(); // start transaction
+		$this->db->insert('houses', array(
+			'house_name' => $housename,
+			'house_created_by' => $housemates[0]['user_id'],
+			'house_joined' => date("Y-m-d H:i:s") // NOW()
+			));
+		$house_id = $this->db->insert_id(); // get created house id
 
-        // Insert links between house and users
+		// Insert links between house and users
 		// i.e. associate each housemate with this house
-       	$lhu_data = array();
-        foreach ($housemates as $housemate) {
-        	$lhu_data[] = array(
-        		'house_id' => $house_id,
-        		'user_id' => $housemate['user_id']
-        	);
-        }
-        $this->db->insert_batch('link_houses_users', $lhu_data);
+	   	$lhu_data = array();
+		foreach ($housemates as $housemate) {
+			$lhu_data[] = array(
+				'house_id' => $house_id,
+				'user_id' => $housemate['user_id']
+			);
+		}
+		$this->db->insert_batch('link_houses_users', $lhu_data);
 
-        // TODO - Notify the existing users that they're in a new house!
+		// TODO - Notify the existing users that they're in a new house!
 
-        // Update users to use new house.
-        // Note: only update current user, and other new users
-        $this->db->set('house_id', $house_id);
-        $in = array();
+		// Update users to use new house.
+		// Note: only update current user, and other new users
+		$this->db->set('house_id', $house_id);
+		$in = array();
 		for ($i = 0; $i < count($housemates); $i++) {
 			if (!isset($housemates[$i]['house_id']) || $i == 0) {
-        		$in[] = $housemates[$i]['user_id'];
+				$in[] = $housemates[$i]['user_id'];
 			}
 		}
 		$this->db->where_in('user_id', $in);
-        $this->db->update('users');
+		$this->db->update('users');
 
-        $this->db->trans_complete(); // commit transaction
+		$this->db->trans_complete(); // commit transaction
 
-        // Verify that everything worked okay
-        if ($this->db->trans_status() == true) {
-            //return $house_id;
-            return TRUE;
-        }
-        log_message('error', 'Transaction failed!');
-        return FALSE;
+		// Verify that everything worked okay
+		if ($this->db->trans_status() == true) {
+			//return $house_id;
+			return TRUE;
+		}
+		log_message('error', 'Transaction failed!');
+		return FALSE;
 	}
 
 	/**
@@ -312,7 +314,7 @@ class Users_model extends CI_Model {
 			$houses[$house_tmp['house_id']] = $house_tmp;
 		}
 
-        return $houses;
+		return $houses;
 
 	}
 

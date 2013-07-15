@@ -9,7 +9,7 @@ $config['stsp_version'] = '4.0';
 $config['stsp_beta'] = TRUE;
 
 // DEMO
-$config['stsp_demo'] = TRUE;
+$config['stsp_demo'] = FALSE;
 
 // Admins - user IDs of users with admin access
 $config['stsp_admins'] = array(1);

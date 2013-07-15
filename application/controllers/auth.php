@@ -136,8 +136,8 @@ class Auth extends CI_Controller {
 			}
 
 			// *** CUSTOM ADDITION ***
-			// Clear session
-			//$this->session->unset_userdata('user_id_facebook');
+			// Clear session(s)
+			$this->session->unset_userdata('user_id_facebook');
 			$this->session->sess_destroy();
 
 			// Redirect back to the main page. We're done with logout
