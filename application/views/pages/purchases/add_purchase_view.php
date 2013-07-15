@@ -127,7 +127,7 @@ if (isset($repop['split_type'])) {
     <div class="controls">
       <div class="input-prepend">
         <label for="price_custom_<?php echo $housemate['user_id']; ?>">
-          <span class="add-on">£</span><input class="input-mini" type="text" name="price_custom[<?php echo $housemate['user_id']; ?>]" id="price_custom_<?php echo $housemate['user_id']; ?>" placeholder="0.00" value="<?php echo (isset($repop['price_custom'][$housemate['user_id']]) ? number_format((double)$repop['price_custom'][$housemate['user_id']], 2) : ''); ?>" />
+          <span class="add-on">£</span><input class="input-mini" type="text" name="price_custom[<?php echo $housemate['user_id']; ?>]" id="price_custom_<?php echo $housemate['user_id']; ?>" placeholder="0.00" value="<?php echo (isset($repop['payees'][$housemate['user_id']]) ? number_format((double)$repop['payees'][$housemate['user_id']], 2) : ''); ?>" />
         </label>
       </div>
     </div>
@@ -164,13 +164,15 @@ if (isset($repop['split_type'])) {
     $('#btn-split-even').trigger('click');
 <?php endif; ?>
 
-    // Enhance Date input
+    // Enhance Date input with date picker
     var purchase_date_input = $('#purchase_date').pickadate({
       format: 'dddd, dd mmm, yyyy', // visible format
       formatSubmit: 'yyyy/mm/dd' // submitted format
     });
+
+    // Set date to the current or pre-set value
     var purchase_date = purchase_date_input.data('pickadate');
-<?php $d = (isset($repop['purchase_date']) && $repop['purchase_date'] != '') ? $repop['purchase_date'] : date('Y/m/d'); ?>
+<?php $d = (isset($repop['date']) && $repop['date'] != '') ? $repop['date'] : date('Y/m/d'); ?>
     purchase_date.setDate( <?php echo substr($d, 0, 4); ?>, <?php echo substr($d, 5, 2); ?>, <?php echo substr($d, 8, 2); ?> );
   </script>
 
