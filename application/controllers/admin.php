@@ -18,27 +18,27 @@ class Admin extends CI_Controller {
 		*/
 
 		$this->load->model('users_model');
-    	$this->user = $this->users_model->getUser();
+		$this->user = $this->users_model->getUser();
 
-    	d($this->user['user_id'], 'user_id');
+		//d($this->user['user_id'], 'user_id');
 
-        if (!in_array($this->user['user_id'], $admin_users)) {
-            $this->session->set_flashdata('error', 'Access denied to admin area.');
-            redirect('/');
-        }
+		if (!in_array($this->user['user_id'], $admin_users)) {
+			$this->session->set_flashdata('error', 'Access denied to admin area.');
+			redirect('/');
+		}
 		
 		$this->load->model('admin_model');
 		
-	    if (ENVIRONMENT == 'development') {
-	      $this->output->enable_profiler(true);
-	    }
+		if (ENVIRONMENT == 'development') {
+			$this->output->enable_profiler(true);
+		}
 	}
 
 	// Index
 	function index() {
 
 		// Send to view
-    $data['user'] = $this->user;
+	$data['user'] = $this->user;
 		$data['subnav'] = $this->subnav;
 		$this->load->view('template', $data);
 		
@@ -50,17 +50,17 @@ class Admin extends CI_Controller {
 		$data['title'] = 'All Houses';
 		
 		$data['houses'] = $this->admin_model->get_houses();
-        
-        // Fetch extra house info
-        foreach ($data['houses'] as $key => $house) {
-            $data['houses'][$key]['housemates'] = $this->users_model->getHousemates($house['house_id']);
-        }
-        
-    $data['user'] = $this->user;
-    
+		
+		// Fetch extra house info
+		foreach ($data['houses'] as $key => $house) {
+			$data['houses'][$key]['housemates'] = $this->users_model->getHousemates($house['house_id']);
+		}
+		
+	$data['user'] = $this->user;
+	
 		// Send to view
 		$data['subnav'] = $this->subnav;
-    $data['view'] = 'admin/houses';
+	$data['view'] = 'admin/houses';
 		$this->load->view('template', $data);
 	
 	}
@@ -71,13 +71,13 @@ class Admin extends CI_Controller {
 		$data['title'] = 'All Users';
 		
 		$data['users'] = $this->admin_model->get_users();
-    
-    $data['user'] = $this->user;
+	
+		$data['user'] = $this->user;
 				
 		// Send to view
 		$data['subnav'] = $this->subnav;
-    $data['view'] = 'admin/users';
-    $this->load->view('template', $data);
+		$data['view'] = 'admin/users';
+		$this->load->view('template', $data);
 	
 	}
 
@@ -88,7 +88,7 @@ class Admin extends CI_Controller {
 
 		$data['title'] = 'All (Global) Notifications';
 		
-    $data['user'] = $this->user;
+		$data['user'] = $this->user;
 		
 		$data['notifications'] = $this->notifications_model->getNotifications('all');
 				

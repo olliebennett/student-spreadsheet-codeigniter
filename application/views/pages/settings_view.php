@@ -43,7 +43,7 @@
 <?php foreach ($housemates_all as $house_id => $housemates) : ?>
       <div class="controls" id="housemates_house_<?php echo $house_id; ?>"<?php echo ($user['house_id'] == $house_id) ? '' : ''; ?>>
 <?php foreach ($housemates as $housemate) : ?>
-        <img src="https://graph.facebook.com/<?php echo $housemate['user_id_facebook']; ?>/picture" class="img-polaroid">
+        <img src="https://graph.facebook.com/<?php echo $housemate['social_identifier_facebook']; ?>/picture" class="img-polaroid">
         <strong><?php echo $housemate['user_name']; ?></strong><!-- <?php echo 'ID: ' . $housemate['user_id']; ?> -->
 <?php endforeach; ?>
       </div>
@@ -200,7 +200,6 @@ if (isset($repop['user_mobile'])) {
 
   <div class="control-group">
     <div class="controls">
-      <input class="btn btn-inverse" type="reset" value="Reset" />
       <input class="btn btn-primary" type="submit" value="Save Settings" />
     </div>
   </div>

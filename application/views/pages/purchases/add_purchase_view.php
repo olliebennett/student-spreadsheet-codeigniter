@@ -190,7 +190,6 @@ if (isset($repop['split_type'])) {
 <?php if (isset($edit)) : ?>
       <a href="<?php echo site_url('purchases/view/' . $purchase_id); ?>" class="btn btn-inverse">Cancel</a>
 <?php endif; ?>
-      <input class="btn btn-inverse" type="reset" id="btn-reset" value="Reset" />
       <input class="btn btn-primary" type="submit" value="<?php echo (isset($edit) ? 'Save Changes' : 'Add Purchase'); ?>" />
     </div>
   </div>

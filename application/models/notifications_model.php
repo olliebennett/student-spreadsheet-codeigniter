@@ -22,7 +22,7 @@ class Notifications_model extends CI_Model {
             $notifications[$n->notification_id] = $n;
         }
 
-        d($notifications, 'notifications');
+        //d($notifications, 'notifications');
 
         return $notifications;
 

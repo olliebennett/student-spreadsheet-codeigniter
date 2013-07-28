@@ -1,1 +1,1 @@
-<p>I'll try to be nice with your data. If you have any questions, <a href="<?php echo site_url('help/contact'); ?>">ask me</a>!</p>
+<p>I cannot accept liability for any data added, or actions taken on this site. If you have any questions, <a href="<?php echo site_url('help/contact'); ?>">ask me</a>!</p>

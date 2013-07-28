@@ -1,6 +1,3 @@
-<p>Select a service to authenticate with. If you have previously authenticated, your account details will be shown below.</p>
-
-<h4>Select a service:</h4>
 <ul id="provider-list">
 <?php
   // Output the enabled services and change link/button if the user is authenticated.
