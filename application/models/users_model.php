@@ -11,11 +11,11 @@ class Users_model extends CI_Model {
 
 		// Improve page load performance by preventing a request if possible:
 		// Check locally if user is logged in (has session)
-		$user_id_facebook = $this->session->userdata('user_id_facebook');
-		if ($user_id_facebook !== FALSE) {
+		$social_identifier_facebook = $this->session->userdata('social_identifier_facebook');
+		if ($social_identifier_facebook !== FALSE) {
 			
 			// check if user exists in db
-			$user = $this->getUserByFacebookId($user_id_facebook);
+			$user = $this->getUserByFacebookId($social_identifier_facebook);
 			if ($user !== FALSE) {
 				return $user;
 			}
@@ -34,6 +34,13 @@ class Users_model extends CI_Model {
 			return NULL;
 		}
 
+		// Redirect to log-in page if required
+		if (!$isConnectedWithFacebook && ($forceLogin || $forceRegister)) {
+			$this->session->set_flashdata('info', 'Please log in before viewing that page.');
+			$this->session->set_userdata('next_page', $this->uri->uri_string());
+			redirect('auth');
+		}
+
 		// We want remaining users to log in - get their details!
 		// (this will force a log-in if they're not already...)
 		$user_fb = $this->hybridauthlib->authenticate('Facebook')->getUserProfile();
@@ -41,9 +48,14 @@ class Users_model extends CI_Model {
 		//d($user_fb,'user_fb');
 
 		// Update local session, to speed up next time
-		$this->session->set_userdata('user_id_facebook', $user_fb->identifier);
+		$this->session->set_userdata('social_identifier_facebook', $user_fb->identifier);
 		// This is also required if user is registering.
-		$this->session->set_userdata('user_name_facebook', $user_fb->displayName);		
+		$this->session->set_userdata('social_displayName', $user_fb->displayName);
+		$this->session->set_userdata('social_firstName', $user_fb->firstName);
+		$this->session->set_userdata('social_lastName', $user_fb->lastName);
+
+		log_message('info', 'user session data set from Facebook:');
+		d_log($user_fb->firstName, '[users_model] fb firstName');
 
 		// Check whether user has registered
 		$user = $this->getUserByFacebookId($user_fb->identifier);
@@ -53,7 +65,7 @@ class Users_model extends CI_Model {
 
 			// Shall we force them to register?
 			if ($forceRegister) {
-				$this->session->set_flashdata('info', 'You are logged in. The final step is to register a house.');
+				$this->session->set_flashdata('info', 'You are logged in. All you need to do is create a house.');
 				redirect('register');
 			} else {
 				return NULL;
@@ -83,10 +95,10 @@ class Users_model extends CI_Model {
 	function updateUserFacebookInfo($user_facebook, $user_database) {
 
 		log_message('info', 'users_model: BEFORE Updating user #' . $user_database['user_id']);
-		log_message('debug', 'users_model: database->user_name_facebook: ' . $user_database['user_name_facebook']);
+		log_message('debug', 'users_model: database->social_displayName: ' . $user_database['social_displayName']);
 		log_message('debug', 'users_model: database->user_email_facebook: ' . $user_database['user_email_facebook']);
-		log_message('debug', 'users_model: database->user_name_first: ' . $user_database['user_name_first']);
-		log_message('debug', 'users_model: database->user_name_last: ' . $user_database['user_name_last']);
+		log_message('debug', 'users_model: database->social_firstName: ' . $user_database['social_firstName']);
+		log_message('debug', 'users_model: database->social_lastName: ' . $user_database['social_lastName']);
 
 		log_message('debug', 'users_model: facebook->displayName: ' . $user_facebook->displayName);
 		log_message('debug', 'users_model: facebook->email: ' . $user_facebook->email);
@@ -95,23 +107,23 @@ class Users_model extends CI_Model {
 
 		// If Facebook details are out of date, update them in database
 		if (
-				$user_facebook->displayName != $user_database['user_name_facebook'] ||
+				$user_facebook->displayName != $user_database['social_displayName'] ||
 				$user_facebook->email != $user_database['user_email_facebook'] ||
-				$user_facebook->firstName != $user_database['user_name_first'] ||
-				$user_facebook->lastName != $user_database['user_name_last']
+				$user_facebook->firstName != $user_database['social_firstName'] ||
+				$user_facebook->lastName != $user_database['social_lastName']
 			) {
 
-			$user_database['user_name_facebook'] = $user_facebook->displayName;
+			$user_database['social_displayName'] = $user_facebook->displayName;
 			$user_database['user_email_facebook'] = $user_facebook->email;
-			$user_database['user_name_first'] = $user_facebook->firstName;
-			$user_database['user_name_last'] = $user_facebook->lastName;
+			$user_database['social_firstName'] = $user_facebook->firstName;
+			$user_database['social_lastName'] = $user_facebook->lastName;
 
 			// Store the updated values
 			$data = array(
-				'user_name_facebook'  => $user_facebook->displayName,
+				'social_displayName'  => $user_facebook->displayName,
 				'user_email_facebook' => $user_facebook->email,
-				'user_name_first'	 => $user_facebook->firstName,
-				'user_name_last'	  => $user_facebook->lastName
+				'social_firstName'	 => $user_facebook->firstName,
+				'social_lastName'	  => $user_facebook->lastName
 			);
 
 			$this->db->where('user_id', $user_database['user_id']);
@@ -126,7 +138,7 @@ class Users_model extends CI_Model {
 	function getUserByFacebookId($facebook_id) {
 
 		$this->db->select();
-		$this->db->where('user_id_facebook', $facebook_id);
+		$this->db->where('social_identifier_facebook', $facebook_id);
 		$this->db->limit(1);
 		$this->db->from('users');
 
@@ -198,24 +210,26 @@ class Users_model extends CI_Model {
 	 * Create House
 	 * @param $housename - house name
 	 * @param $housemates - array of housemate details:
-	 *			$housemates[x]['user_id_facebook']
-	 *			$housemates[x]['user_name_facebook']
+	 *			$housemates[x]['social_identifier_facebook']
+	 *			$housemates[x]['social_displayName']
 	 *
 	 * - the current user is $housemates[0]
 	 * - even this user may not have registered yet (so may not have user_id)
 	 */
 	function createHouse($housename, $housemates) {
 
+		d_log($housemates, 'housemates');
+
 		// Find those users who already have accounts
-		$this->db->select('user_id, user_id_facebook, house_id');
+		$this->db->select('user_id, social_identifier_facebook, house_id');
 		foreach ($housemates as $housemate) {
 			// TODO - it is probably nicer to use a subquery here.
-			$this->db->or_where('user_id_facebook', $housemate['user_id_facebook']);
+			$this->db->or_where('social_identifier_facebook', $housemate['social_identifier_facebook']);
 		}
 		$query = $this->db->get('users');
 		foreach ($query->result() as $row) {
 			for ($i = 0; $i < count($housemates); $i++) {
-				if ($housemates[$i]['user_id_facebook'] == $row->user_id_facebook) {
+				if ($housemates[$i]['social_identifier_facebook'] == $row->social_identifier_facebook) {
 					$housemates[$i]['user_id'] = $row->user_id;
 					$housemates[$i]['house_id'] = $row->house_id;
 					break; // end "for" loop
@@ -227,11 +241,17 @@ class Users_model extends CI_Model {
 		for ($i = 0; $i < count($housemates); $i++) {
 			if (!isset($housemates[$i]['user_id'])) {
 				// user not in database
-				$this->db->insert('users', array(
-					'user_id_facebook' => $housemates[$i]['user_id_facebook'],
-					'user_name_facebook' => $housemates[$i]['user_name_facebook'],
-					'user_name' => $housemates[$i]['user_name_facebook'] // Update locally stored username too
-				));
+				$arr_insert['social_identifier_facebook'] = $housemates[$i]['social_identifier_facebook'];
+				$arr_insert['social_displayName_facebook'] = $housemates[$i]['social_displayName_facebook'];
+				// Update locally stored username too
+				$arr_insert['user_name'] = $housemates[$i]['social_displayName_facebook'];
+				// Add first, last names if we know them (i.e. for current user)
+				if (isset($housemates[$i]['social_firstName']) && isset($housemates[$i]['social_lastName'])) {
+					$arr_insert['user_name_first'] = $housemates[$i]['social_firstName'];
+					$arr_insert['user_name_last'] = $housemates[$i]['social_lastName'];
+				}
+				$this->db->insert('users', $arr_insert);
+				unset($arr_insert);
 				// TODO - These inserts could be "batched", but that adds complexity
 				$housemates[$i]['user_id'] = $this->db->insert_id();
 			}

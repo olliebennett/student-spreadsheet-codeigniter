@@ -57,11 +57,19 @@
         </div>
         <h1>Student Spreadsheet</h1>
         <div id="user_info">
-<?php if (isset($user) && !is_null($user) && $user !== FALSE) : ?>
-          <span id="user_name"><?php echo $user['user_name_first']; ?><br /><?php echo $user['user_name_last']; ?></span>
-          <img id="user_pic" src="https://graph.facebook.com/<?php echo $user['user_id_facebook']; ?>/picture" alt="Profile Pic" />
+<?php if ($this->session->userdata('social_identifier_facebook')) : ?>
+          <div id="user_name">
+          <?php echo isset($user['user_name_first']) ? $user['user_name_first'] : ($this->session->userdata('social_firstName')) ? $this->session->userdata('social_firstName') : 'Log In'; ?>
+          <br />
+          <?php echo isset($user['user_name_last']) ? $user['user_name_last'] : ($this->session->userdata('social_lastName')) ? $this->session->userdata('social_lastName') : ''; ?>
+          </div>
+          <div id="user_pic_container">
+            <img id="user_pic" src="https://graph.facebook.com/<?php echo $this->session->userdata('social_identifier_facebook'); ?>/picture" height="50" width="50" alt="Profile Pic" />
+            <span class="social-icon"><img src="<?php echo base_url(); ?>assets/img/fb_16x16.png" width="16" height="16" /></span> 
+          </div>
+
 <?php else : ?>
-          <span id="user_name"><a href="<?php echo site_url('auth'); ?>">Login<br />First</a></span>
+          <span id="user_name"><a href="<?php echo site_url('auth'); ?>">Log In</a></span>
           <img id="user_pic" height="50" width="50" src="<?php echo base_url(); ?>assets/img/member_photo_placeholder.png"  alt="Profile Pic" />
 <?php endif; ?>
         </div><!-- #user_info -->
@@ -73,11 +81,13 @@
         <span class="pull-left"><a href="<?php echo site_url(); ?>" class="nav<?php echo (($this->uri->segment(1) == '') ? ' nav_current' : '') ?> nav_home">Home</a></span>
         <span class="pull-left"><a href="<?php echo site_url('purchases'); ?>" class="nav<?php echo $this->uri->uri_string() == 'purchases' ? ' nav_current' : ''; ?> nav_pos_left nav_purchases">Purchases</a><a href="<?php echo site_url('purchases/add'); ?>" class="nav<?php echo (($this->uri->uri_string() == 'purchases/add') ? ' nav_current' : '') ?> nav_pos_right nav_add">&nbsp;</a></span>
         <span class="pull-left"><a href="<?php echo site_url('settings'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'settings') ? ' nav_current' : '') ?> nav_settings">Settings</a></span>
-<?php if (isset($user)) : ?>
+<?php if ($this->session->userdata('social_identifier_facebook')) : ?>
         <span class="pull-right"><a href="<?php echo site_url('auth/logout'); ?>" class="nav nav_logout">Logout</a></span>
 <?php else : ?>
-        <span class="pull-right"><a href="<?php echo site_url('register'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'register') ? ' nav_current' : '') ?> nav_register">Register</a></span>
         <span class="pull-right"><a href="<?php echo site_url('auth'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'auth') ? ' nav_current' : '') ?> nav_login">Login</a></span>
+<?php endif; ?>
+<?php if (isset($user) && !is_null($user) && $user !== FALSE && !isset($user['user_id'])) : ?>
+        <span class="pull-right"><a href="<?php echo site_url('register'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'register') ? ' nav_current' : '') ?> nav_register">Register</a></span>
 <?php endif; ?>
         <span class="pull-right"><a href="<?php echo site_url('help/about'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'help') ? ' nav_current' : '') ?> nav_help">Help</a></span>
 <?php if ((isset($user['user_id']) && in_array($user['user_id'], $this->config->item('stsp_admins')))) : ?>

@@ -14,7 +14,7 @@ class Auth extends CI_Controller {
 		//d($this->user, '$this->user');
 
 		// Save user ID in session (for future requests).
-		//$this->session->set_userdata('user_id_facebook', $this->user['user_id_facebook']);
+		//$this->session->set_userdata('social_identifier_facebook', $this->user['social_identifier_facebook']);
 
 	    if (ENVIRONMENT == 'development') {
 	      $this->output->enable_profiler(true);
@@ -54,7 +54,13 @@ class Auth extends CI_Controller {
 				{
 					log_message('debug', 'controller.HAuth.login: user authenticated.');
 					// Redirect back to the index to show the profile
-					redirect('auth/', 'refresh');
+					
+					// If next page was specified, send them there!
+					if ($this->session->userdata('next_page') !== false) {
+						redirect($this->session->userdata('next_page'));
+					} else {
+						redirect('auth/', 'refresh');
+					}
 				}
 				else // Cannot authenticate user
 					{
@@ -137,7 +143,7 @@ class Auth extends CI_Controller {
 
 			// *** CUSTOM ADDITION ***
 			// Clear session(s)
-			$this->session->unset_userdata('user_id_facebook');
+			$this->session->unset_userdata('social_identifier_facebook');
 			$this->session->sess_destroy();
 
 			// Redirect back to the main page. We're done with logout

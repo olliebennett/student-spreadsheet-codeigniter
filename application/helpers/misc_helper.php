@@ -2,8 +2,13 @@
 
 /* Display variable */
 function d($d,$name = 'Unspecified Variable'){
-	echo "<code>$name :</code><br /><br />";
+	echo "<code>$name :</code><br />";
 	var_dump($d);
+}
+
+function d_log($d, $name = 'Unspecified Variable') {
+	log_message('debug', "# variable '$name' =");
+	log_message('debug', print_r($d, TRUE));
 }
 
 function filterCsv($str) {
