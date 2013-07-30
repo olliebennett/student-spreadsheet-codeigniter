@@ -202,12 +202,12 @@ CREATE TABLE IF NOT EXISTS `stsp_sessions` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'User ID',
-  `user_id_facebook` bigint(20) unsigned DEFAULT NULL COMMENT 'Facebook ID',
+  `social_identifier_facebook` bigint(20) unsigned DEFAULT NULL COMMENT 'Facebook ID',
   `house_id` int(10) unsigned NOT NULL COMMENT 'House ID',
   `user_name` varchar(25) NOT NULL COMMENT 'Selected Name',
   `user_name_first` varchar(15) NOT NULL,
   `user_name_last` varchar(15) NOT NULL,
-  `user_name_facebook` varchar(25) NOT NULL,
+  `social_displayName_facebook` varchar(25) NOT NULL,
   `user_email` varchar(100) DEFAULT NULL,
   `user_email_facebook` varchar(100) DEFAULT NULL,
   `user_mobile` varchar(20) DEFAULT NULL COMMENT 'Mobile Number, eg 441234567890',
@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `conf_seensettings` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'set to 1 when settings updated, 0 until then',
   `conf_landingpage` enum('home','newpurchase','purchase') NOT NULL,
   PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_id_facebook` (`user_id_facebook`)
+  UNIQUE KEY `social_identifier_facebook` (`social_identifier_facebook`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='User Details' AUTO_INCREMENT=3 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
