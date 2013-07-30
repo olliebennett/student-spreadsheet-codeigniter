@@ -1,8 +1,12 @@
 <p>Welcome to The Student Spreadsheet.</p>
 
+<?php if ($this->config->item('stsp_beta')) : ?>
+
 <p class="text-error">This is the <strong>beta</strong> version; all data may be deleted at any time.</p>
 
 <p>Please use the <a href="http://studentspreadsheet.com/">current (ugly) version</a> instead.</p>
+
+<?php endif; ?>
 
 <h3>What is Student Spreadsheet?</h3>
 
@@ -32,4 +36,4 @@
 	<li>All housemates are now even!</li>
 </ul>
 
-<p>See the demo!</p>
+<!-- TODO <p>See the demo!</p> -->
