@@ -35,7 +35,7 @@ class Comments_model extends CI_Model {
             'comment_added_time' => date("Y-m-d H:i:s") // NOW()
         );
 
-        d($c_data, 'c_data');
+        //d($c_data, 'c_data');
 
         $this->db->insert('comments', $c_data);
 
