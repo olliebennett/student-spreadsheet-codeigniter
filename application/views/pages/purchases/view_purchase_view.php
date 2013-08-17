@@ -28,17 +28,20 @@
 
 <h3>Purchase History and Comments</h3>
 
-<p>[ <span id="accordion-toggle-all">expand all</span> ]</p>
+<?php
+$html_expand = '<i class="icon-chevron-down"></i> expand all';
+$html_collapse = '<i class="icon-chevron-up"></i> collapse all';
+?>
+
+<p>[ <span id="accordion-toggle-all"><?php echo $html_expand; ?></span> ]</p>
 <script>
 $('#accordion-toggle-all').click(function() {
-  if ($('#accordion-toggle-all').text() === 'expand all') {
-    console.log('showing all');
+  if ($('#accordion-toggle-all').html() === '<?php echo $html_expand; ?>') {
     $('.accordion-body').collapse('show');
-    $('#accordion-toggle-all').text('collapse all');
+    $('#accordion-toggle-all').html('<?php echo $html_collapse; ?>');
   } else {
-    console.log('hiding all');
     $('.accordion-body').collapse('hide');
-    $('#accordion-toggle-all').text('expand all');
+    $('#accordion-toggle-all').html('<?php echo $html_expand; ?>');
   }
 });
 </script>

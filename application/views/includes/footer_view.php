@@ -1,9 +1,9 @@
     </div><!-- #content -->
 
     <footer>
-      <span class="pull-left">&copy; <a href="http://olliebennett.co.uk/">Ollie Bennett</a> | v <?php echo $this->config->item('stsp_version') . (($this->config->item('stsp_beta')) ? ' <strong>BETA</strong>' : '') . (($this->config->item('stsp_demo')) ? ' DEMO' : ''); ?> | <a href="<?php echo base_url(); ?>help/disclaimer">Disclaimer</a> | <a href="<?php echo base_url(); ?>help/privacy">Privacy</a></span>
+      <span class="pull-left">&copy; <a href="http://olliebennett.co.uk/">Ollie Bennett</a> | v <?php echo $this->config->item('stsp_version') . ((ENVIRONMENT == 'testing') ? ' <strong>BETA</strong>' : '') . ((ENVIRONMENT == 'demo') ? ' DEMO' : ''); ?> | <a href="<?php echo base_url(); ?>help/disclaimer">Disclaimer</a> | <a href="<?php echo base_url(); ?>help/privacy">Privacy</a></span>
       <?php if (ENVIRONMENT != 'production') { ?>
-        <span class="pull-right"><strong>{elapsed_time}</strong> sec : <?php echo ENVIRONMENT; ?></span>
+        <span class="pull-right"><?php if (ENVIRONMENT == 'development') : ?><strong>{elapsed_time}</strong> sec : <?php endif; ?><?php echo ENVIRONMENT; ?></span>
       <?php } ?>
       <div class="clearfix"></div>
     </footer>

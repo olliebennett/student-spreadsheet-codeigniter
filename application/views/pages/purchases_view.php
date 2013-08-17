@@ -21,7 +21,11 @@
 <p>Showing <!--# to # of --><?php echo count($purchases); ?>
 <?php echo ($this->input->get('show') == 'deleted') ? ' <b>deleted</b>' : ''; ?>
 <?php echo (count($purchases) == 1) ? ' purchase' : ' purchases'; ?>,
-<small>ordered by <?php echo ($options['order'] == 'asc') ? 'acsending' : 'descending'; ?> <?php echo $options['order_by']; ?></small>.</p>
+<?php $sort_names = array(
+'date' => 'purchase date',
+'added_time' => 'time added'
+); ?>
+<small>ordered by <?php echo $sort_names[$options['order_by']]; ?> in <?php echo ($options['order'] == 'asc') ? 'ascending' : 'descending'; ?> order.</small></p>
 
 <?php $this->load->view('pages/purchases/includes/table.php'); ?>
 
@@ -50,8 +54,9 @@
 
 <?php //$this->load->view('pages/purchases/includes/balances.php'); ?>
 
-
 <?php $this->load->view('pages/purchases/includes/balances_graph.php'); ?>
+
+<p>To repay what is owed, click the "consolidate purchases" link below.</p>
 
 
 <h3>Options</h3>

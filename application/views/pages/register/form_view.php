@@ -1,3 +1,7 @@
+<?php if (ENVIRONMENT != 'demo') : ?>
+<p>To see this site in action before you register, see the <a href="http://demo.studentspreadsheet.com/">demo</a>.</p>
+<?php endif; ?>
+
 <?php echo form_open('register',array('id'=>'register_form', 'class'=>'form-horizontal')); ?>
 
 
@@ -6,7 +10,7 @@
   <div class="controls">
     <div class="input-prepend">
       <span class="add-on"><i class="icon-home"></i></span>
-      <input class="span3" id="housename" name="housename" type="text" placeholder="eg. 221B Baker Street">
+      <input class="span3" id="housename" name="housename" type="text" placeholder="eg. 10 Downing Street">
     </div>
   </div>
 </div>

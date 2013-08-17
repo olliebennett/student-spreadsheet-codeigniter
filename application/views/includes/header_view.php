@@ -20,6 +20,7 @@
 
   <!-- jQuery TimeAgo -->
   <script src="<?php echo base_url ();?>assets/lib/jquery-timeago/jquery.timeago.js"></script>
+  <script>jQuery.timeago.settings.allowFuture = true;</script>
 
 <?php if ($this->uri->segment(1) == 'purchases') : ?>
   <!-- jQuery PickADate -->
@@ -63,14 +64,14 @@
           <br />
           <?php echo isset($user['user_name_last']) ? $user['user_name_last'] : ($this->session->userdata('social_lastName')) ? $this->session->userdata('social_lastName') : ''; ?>
           </div>
-          <div id="user_pic_container">
-            <img id="user_pic" src="https://graph.facebook.com/<?php echo $this->session->userdata('social_identifier_facebook'); ?>/picture" height="50" width="50" alt="Profile Pic" />
-            <span class="social-icon"><img src="<?php echo base_url(); ?>assets/img/fb_16x16.png" width="16" height="16" /></span> 
+          <div class="user_pic_container">
+            <img class="user_pic" src="https://graph.facebook.com/<?php echo $this->session->userdata('social_identifier_facebook'); ?>/picture" height="50" width="50" alt="Profile Pic" />
+            <span class="user_pic_social_overlay"><img src="<?php echo base_url(); ?>assets/img/fb_16x16.png" width="16" height="16" /></span> 
           </div>
 
 <?php else : ?>
-          <span id="user_name"><a href="<?php echo site_url('auth'); ?>">Log In</a></span>
-          <img id="user_pic" height="50" width="50" src="<?php echo base_url(); ?>assets/img/member_photo_placeholder.png"  alt="Profile Pic" />
+          <div id="user_name"><a href="<?php echo site_url('auth'); ?>">Log In</a></div>
+          <img class="user_pic" height="50" width="50" src="<?php echo base_url(); ?>assets/img/member_photo_placeholder.png"  alt="Profile Pic" />
 <?php endif; ?>
         </div><!-- #user_info -->
 

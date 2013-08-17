@@ -1,4 +1,4 @@
-<ul id="provider-list">
+<div id="provider-list">
 <?php
   // Output the enabled services and change link/button if the user is authenticated.
   $this->load->helper('url');
@@ -12,10 +12,22 @@
     echo '</p>';
   }
 ?>
-</ul>
+</div>
+
 <br style="clear: both;"/>
 
-<p class="footer">
+<h3>Why Facebook?</h3>
+
+<p>Facebook is used <strong>only</strong> to retrieve your list of friends so you can select your housemates.</p>
+
+<p>Student Spreadsheet never sees your Facebook password.</p>
+
+<p>We <strong>DO NOT</strong> require permission to post to your wall / email your friends / send messages or access unnecessary personal information.</p>
+
+<p>Still not happy? Sorry to hear that! Facebook is currently the only option for logging in. If you have comments or questions, please <a href="<?php echo site_url('help/contact'); ?>">get in touch</a>!</p>
+
+<p>There are plans for login using Twitter and other social networks too.</p>
+
 <?php
 // Output the profiles of each logged in service
 foreach ($providers as $provider => $d) :
@@ -28,20 +40,30 @@ foreach ($providers as $provider => $d) :
       <tr>
         <td width="150" valign="top" align="center">
 <?php if ( !empty($d['user_profile']->profileURL) ) : ?>
-      <a href="<?php echo $d['user_profile']->profileURL; ?>"><img src="<?php echo $d['user_profile']->photoURL; ?>" title="<?php echo $d['user_profile']->displayName; ?>" border="0" style="height: 120px;"></a>
+          <a href="<?php echo $d['user_profile']->profileURL; ?>"><img src="<?php echo $d['user_profile']->photoURL; ?>" title="<?php echo $d['user_profile']->displayName; ?>" style="height: 120px;"></a>
 <?php else : ?>
-    <img src="public/avatar.png" title="<?php echo $d['user_profile']->displayName; ?>" border="0" >
+          <img src="public/avatar.png" title="<?php echo $d['user_profile']->displayName; ?>" >
 <?php endif; ?>
         </td>
         <td align="left"><table width="100%" cellspacing="0" cellpadding="3" border="0">
             <tbody>
-<?php foreach ($d['user_profile'] as $key=>$value) : ?>
+<?php foreach ($d['user_profile'] as $key => $value) : ?>
 <?php if ($value != "") : ?>
-              <tr>
-                <td class="pItem"><strong><?php echo ucfirst($key); ?>:</strong> <?php echo (filter_var($value, FILTER_VALIDATE_URL) !== false) ?  '<a href="'.$value.'" target="_blank">'.$value.'</a>' : $value; ?></td>
-              </tr>
+              <!-- "<?php echo $key; ?>": "<?php echo $value; ?>"-->
 <?php endif; ?>
 <?php endforeach; ?>
+              <tr>
+                <td class="pItem"><strong>Name:</strong> <?php echo $d['user_profile']->displayName; ?></td>
+              </tr>
+              <tr>
+                <td class="pItem"><strong>Email:</strong> <?php echo $d['user_profile']->email; ?></td>
+              </tr>
+              <tr>
+                <td class="pItem"><strong>Profile ID:</strong> <?php echo $d['user_profile']->identifier; ?></td>
+              </tr>
+              <tr>
+                <td class="pItem"><strong>Profile Link:</strong> <a href="<?php echo $d['user_profile']->profileURL; ?>"><?php echo $d['user_profile']->profileURL; ?></a></td>
+              </tr>
             </tbody>
           </table>
         </td>
@@ -50,4 +72,3 @@ foreach ($providers as $provider => $d) :
   </fieldset>
 <?php endif; ?>
 <?php endforeach; ?>
-</p>

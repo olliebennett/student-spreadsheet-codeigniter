@@ -39,9 +39,10 @@ foreach ($housemates as $housemate) {
 
 <?php $colspan = 4 + count($housemates); ?>
 <?php foreach ($purchases as $purchase_id => $purchase) : ?>
+	<?php $isNew = (strtotime($purchase['added_time']) > (strtotime('now') - 60*60*2)); ?>
 	<tr class="purchase-overview<?php echo ($purchase['status'] == 'deleted') ? ' error' : ''; ?>">
 		<td><?php echo $purchase['date']; ?></td>
-		<td><?php echo $purchase['description']; ?></td>
+		<td><?php echo ($isNew) ? '<i title="Recently Added" class="icon-star"></i> ' : '' ?><?php echo $purchase['description']; ?></td>
 		<td><?php echo $housemate_name[$purchase['payer']]; ?></td>
 		<td><?php echo render_price($purchase['total_price']); ?></td>
 <?php foreach ($housemates as $housemate) : ?>
@@ -56,8 +57,8 @@ foreach ($housemates as $housemate) {
   Deleted <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($purchase['deleted_time'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($purchase['deleted_time'])); ?></time> by <?php echo ($user['user_id'] == $purchase['deleted_by']) ? '<em>you</em>' : $housemate_name[$purchase['deleted_by']]; ?>.
 </span>
 <?php else : // not deleted ?>
-Added <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($purchase['added_time'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($purchase['added_time'])); ?></time> by <?php echo ($user['user_id'] == $purchase['added_by']) ? '<em>you</em>' : $housemate_name[$purchase['added_by']]; ?>.
-        (<?php //echo $purchase['comment_count'] . ' ' . ($purchase['comment_count'] == 1 ? 'comment' : 'comments'); ?>)
+<?php echo ($purchase['status'] == 'edited') ? 'Last edited' : 'Added' ?> <time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($purchase['added_time'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($purchase['added_time'])); ?></time> by <?php echo ($user['user_id'] == $purchase['added_by']) ? '<em>you</em>' : $housemate_name[$purchase['added_by']]; ?>.
+        <!--(<?php //echo $purchase['comment_count'] . ' ' . ($purchase['comment_count'] == 1 ? 'comment' : 'comments'); ?>)-->
 <?php endif; // deleted ?>
 			</span>
 			<span class="pull-right">
