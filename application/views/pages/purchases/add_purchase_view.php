@@ -39,8 +39,15 @@ if (isset($error) && is_array($error)) {
     <div class="controls">
       <?php //echo form_err('payer'); ?>
       <select name="payer" id="payer">
+<?php
+// Determine which user should be pre-selected
+$whopaiduser = $user['user_id'];
+if (isset($repop['payer'])) {
+  $whopaiduser = $repop['payer'];
+}
+?>
 <?php foreach ($housemates as $housemate) : ?>
-        <option value="<?php echo $housemate['user_id']; ?>" <?php echo ((isset($repop['payer'])) && (($housemate['user_id'] == $repop['payer']) || ($housemate['user_id'] == $user['user_id']))) ? ' selected="selected"' : ''; ?>><?php echo $housemate['user_name']; ?></option>
+        <option value="<?php echo $housemate['user_id']; ?>" <?php echo ($housemate['user_id'] == $whopaiduser) ? ' selected="selected"' : ''; ?>><?php echo $housemate['user_name']; ?></option>
 <?php endforeach; ?>
       </select>
     </div>
