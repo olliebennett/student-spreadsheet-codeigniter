@@ -7,9 +7,9 @@
 <?php foreach ($balances as $balance_id => $balance_price) : ?>
 <?php $balance_price = round($balance_price*100)/100; ?>
 <?php //d($balance_price, 'balance_price'); ?>
-<?php $scaled_width = abs(50 * ($balance_price / $absmax)); ?>
+<?php $scaled_width = ($absmax == 0) ? 0 : abs(50 * ($balance_price / $absmax)); ?>
 <?php //d($scaled_width, 'scaled_width'); ?>
-  <div class="row <?php echo (abs($balance_price) < 0.005) ? '' : ($balance_price > 0) ? 'text-success' : 'text-error'; ?>">
+  <div class="row<?php echo (abs($balance_price) < 0.005) ? ' text-info' : (($balance_price > 0) ? ' text-success' : ' text-error'); ?>">
     <div class="span2">
     	<?php echo $housemates[$balance_id]['user_name']; ?> 
     </div>
