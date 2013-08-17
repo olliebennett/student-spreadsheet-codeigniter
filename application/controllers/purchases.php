@@ -137,12 +137,39 @@ class Purchases extends CI_Controller {
 
       }
 
+    } else if ($this->input->get('s')) { // split type (s) is required
+      $repop['description'] = $this->input->get('d','');
+      $repop['split_type'] = $this->input->get('s', 'custom');
+      if ($this->input->get('payer')) {
+        $repop['payer'] = $this->input->get('payer');
+      }
+      if ($this->input->get('total' !== FALSE)) {
+        $repop['total_price'] = $this->input->get('total');
+      }
+      if ($this->input->get('payees')) {
+        // expect format USER1:AMOUNT1|USER2:AMOUNT2
+        $payees_split = explode('|',$this->input->get('payees'));
+        foreach ($payees_split as $payee_info) {
+          $payee_info_split = explode(':', $payee_info);
+          $payee_info_id = $payee_info_split[0];
+          $payee_info_price = (count($payee_info_split) > 1) ? $payee_info_split[1] : '';
+          $repop['payees'][$payee_info_id] = $payee_info_price;
+        }
+        
+      }
+
+      $data['repop'] = $repop;
     }
 
-    $data['title'] = "Add Purchase";
+    if (isset($data['repop']) && isset($data['repop']['description']) && ($data['repop']['description'] == 'Repayment')) {
+      $data['title'] = "Add Repayment";
+    } else {
+      $data['title'] = "Add Purchase";
+    }
     $data['user'] = $this->user;
     $data['housemates'] = $this->housemates;
     $data['view'] = 'purchases/add_purchase';
+    
     $this->load->view('template', $data);
 
   }
@@ -475,6 +502,10 @@ class Purchases extends CI_Controller {
       );
 
       $i++;
+    }
+    // Handle the case where no transactions are required
+    if ($i == 1) {
+      $payments = FALSE;
     }
     // Show a warning if things have got out of hand!
     if ($i == 25) {

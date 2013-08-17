@@ -17,14 +17,21 @@ class Purchases_model extends CI_Model {
     {
 
         // Default options:
-        if (!isset($opt['show']) || !in_array($opt['show'], array('ok','deleted','edited'))) {
-            $opt['show'] = 'ok';
-        }
-        if (!isset($opt['order']) || !in_array($opt['order'], array('asc','desc'))) {
-            $opt['order'] = 'desc';
-        }
-        if (!isset($opt['order_by']) || !in_array($opt['order_by'], array('added_time','date','purchase_id'))) {
-            $opt['order_by'] = 'added_time';
+        $show = (!isset($opt['show']) || !in_array($opt['show'], array('ok','deleted','edited'))) ? 'ok' : $opt['show'];
+        $orders[0]['order'] = (!isset($opt['order']) || !in_array($opt['order'], array('asc','desc'))) ? 'desc' : $opt['order'];
+        $orders[0]['order_by'] = (!isset($opt['order_by']) || !in_array($opt['order_by'], array('added_time','date','purchase_id'))) ? 'p.added_time' : 'p.' . $opt['order_by'];
+
+        // Define secondary ordering criteria
+        switch ($orders[0]['order_by']) {
+            case 'p.added_time':
+                $orders[1]['order_by'] = 'p.purchase_id';
+                $orders[1]['order'] = $orders[0]['order'];
+                break;
+
+            case 'p.date':
+                $orders[1]['order_by'] = 'p.added_time';
+                $orders[1]['order'] = $orders[0]['order'];
+                break;
         }
 
         // Get all purchase details
@@ -32,45 +39,14 @@ class Purchases_model extends CI_Model {
         $this->db->from('purchases p');
         $this->db->join('link_purchases_users lpu', 'lpu.purchase_id = p.purchase_id');
         $this->db->where('p.house_id', $house_id);
-        $this->db->where('p.status', $opt['show']);
-        $this->db->order_by('p.' . $opt['order_by'], $opt['order']);
+        $this->db->where('p.status', $show);
+        for ($i = 0; $i < count($orders); $i++) {
+            $this->db->order_by($orders[$i]['order_by'], $orders[$i]['order']);
+        }
         $query = $this->db->get();
-
-
-        // Return this query result if exporting data
-        //if ($this->uri->segment(2) == 'export') {
-        //    return $query;
-        //}
 
         return $this->purchasesArrayFromQuery($query);
 
-        /*
-        $sql = "
-            SELECT      *,
-                        COUNT(*) IN (
-                            SELECT  c.comment_id
-                            FROM    comments c
-                            ) as comment_count
-            FROM        purchases p
-            LEFT JOIN   comments c
-            ON          c.parent_id = p.purchase_id
-            JOIN        link_purchases_users lpu
-            ON          p.purchase_id = lpu.purchase_id
-            GROUP BY    p.purchase_id
-        ";
-        $query = $this->db->query($sql);
-        return $query->result_array();
-
-        */
-
-
-        // $this->db->select(); // defaults to all (*)
-        // $this->db->order_by('date', 'desc');
-        // $this->db->from('purchases');
-        // $this->db->limit(4);
-        // $query = $this->db->get();
-
-        // return $query->result_array();
     }
 
     /**
@@ -159,6 +135,10 @@ class Purchases_model extends CI_Model {
 
     function addPurchase($user_id, $house_id, $data)
     {
+
+        d_log($user_id, 'user_id');
+        d_log($house_id, 'house_id');
+        d_log($data, 'data');
 
         $p_data = array(
             'description' => $data['description'],
