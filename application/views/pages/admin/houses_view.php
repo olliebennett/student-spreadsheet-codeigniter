@@ -4,7 +4,7 @@
 
 <?php foreach ($houses as $house) : ?>
 
-<h3>House <b>#<?php echo $house['house_id']; ?></b>: <?php echo $house['house_name']; ?></h3>
+<h3>House <b><a href="<?php echo site_url('admin/houses/' . $house['house_id']); ?>">#<?php echo $house['house_id']; ?></a></b>: <?php echo $house['house_name']; ?></h3>
 
 <p>Created on <?php echo strftime('%a %d %b %Y', strtotime($house['house_joined'])); ?> (<time class="timeago" datetime="<?php echo strftime('%Y-%m-%dT%H:%M:%SZ', strtotime($house['house_joined'])); ?>"><?php echo strftime('%a %d %b %Y at %H:%M', strtotime($house['house_joined'])); ?></time>) by <?php echo $house['housemates'][$house['house_created_by']]['user_name']; ?>. Currency = <?php echo $house['house_currency']; ?>.</p>
 
