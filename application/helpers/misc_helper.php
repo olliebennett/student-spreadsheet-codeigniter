@@ -62,19 +62,23 @@ echo '
  * Render Price
  * - Ignore any small variations from 0.
  * - Display "-" sign if negative (but don't bother with "+" sign)
- * - Wrap units and decimals in ".pounds" and ".price" span tags respectively, for styling. * 
+ * - Wrap units and decimals in ".cur_units" and ".cur_decimals" span tags respectively, to enable styling. * 
  */
-function render_price($val, $cur = '&#163;')
+function render_price($val, $currency_html = '&#163;')
 {
 	
   if (!is_numeric($val)) {
     return 'NaN';
   }
 
-  $pounds = number_format(abs($val), 0, '.', ',');
-  $pence = substr(round(abs($val)*100%100) . '00', 0, 2);
+  $str = number_format($val,2);
 
-  return ((abs($val) < 0.005) ? '' : ($val < 0 ? '-' : '<!--+-->')) . '&nbsp;' . $cur . '&nbsp;' . '<span class="cur_units">' . $pounds . '</span>.<span class="cur_decimals">' . $pence . '</span>';
+  $arr = explode('.',$str);
+
+  $cur_units = str_replace('-','',$arr[0]);
+  $cur_decimals = $arr[1];
+
+  return "<!-- $val -->" . ((abs($val) >= 0.005 && $val < 0) ? '-' : '<!--+-->') . '&nbsp;' . $currency_html . '&nbsp;' . '<span class="cur_units">' . $cur_units . '</span>.<span class="cur_decimals">' . $cur_decimals . '</span>';
 
 }
 
