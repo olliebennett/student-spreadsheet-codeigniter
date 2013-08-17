@@ -23,6 +23,7 @@ date_default_timezone_set('UTC');
  *
  *     development
  *     testing
+ *     demo
  *     production
  *
  * NOTE: If you change these, also change the error_reporting() code below
@@ -47,6 +48,7 @@ if (defined('ENVIRONMENT'))
 		break;
 	
 		case 'testing':
+		case 'demo':
 		case 'production':
 			error_reporting(0);
 		break;

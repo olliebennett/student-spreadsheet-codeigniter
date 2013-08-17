@@ -5,8 +5,25 @@ class Users_model extends CI_Model {
 	function getUser($forceLogin = TRUE, $forceRegister = TRUE, $forceFacebookRefresh = FALSE) {
 
 		// Log in automatically if in DEMO mode
-		if ($this->config->item('stsp_demo')) {
-			return $this->getUserByFacebookId('504850777'); // TODO - use a sample user.
+		if (ENVIRONMENT === 'demo') {
+
+			// 100004986727805
+			
+			$demo_user['user_id'] = 1;
+			$demo_user['facebook_id'] = '100004986727805'; //'504850777';
+			$demo_user['facebook_displayName'] = 'Sample User';
+			$demo_user['facebook_firstName'] = 'Sample';
+			$demo_user['facebook_lastName'] = 'User';
+
+			$this->session->set_userdata('social_identifier_facebook', $demo_user['facebook_id']);
+			$this->session->set_userdata('social_displayName', $demo_user['facebook_displayName']);
+			$this->session->set_userdata('social_firstName', $demo_user['facebook_firstName']);
+			$this->session->set_userdata('social_lastName', $demo_user['facebook_lastName']);
+
+			$fake_user = $this->getUserByFacebookId($demo_user['facebook_id']); // TODO - use a sample user.
+			if ($fake_user === FALSE) {
+				show_error('An error occurred while logging you in as a demo user. Test user does not exist!');
+			}
 		}
 
 		// Improve page load performance by preventing a request if possible:
@@ -54,8 +71,8 @@ class Users_model extends CI_Model {
 		$this->session->set_userdata('social_firstName', $user_fb->firstName);
 		$this->session->set_userdata('social_lastName', $user_fb->lastName);
 
-		log_message('info', 'user session data set from Facebook:');
-		d_log($user_fb->firstName, '[users_model] fb firstName');
+		//log_message('info', 'user session data set from Facebook:');
+		//d_log($user_fb->firstName, '[users_model] fb firstName');
 
 		// Check whether user has registered
 		$user = $this->getUserByFacebookId($user_fb->identifier);
@@ -168,6 +185,17 @@ class Users_model extends CI_Model {
 	 * - store in session for faster access
 	 */
 	function getUserFacebookFriends() {
+
+		if (ENVIRONMENT == 'demo') {
+			return array(
+				2 => "User Two",
+				3 => "User Three",
+				4 => "User Four",
+				5 => "User Five",
+				6 => "User Six",
+				7 => "User Seven"
+			);
+		}
 
 		// Retrieve from session, if available
 		$friends_session = $this->session->userdata('fb_friends');
@@ -351,7 +379,6 @@ class Users_model extends CI_Model {
 		$this->db->from('users');
 		$in = array();
 		foreach ($house_users as $house_user) {
-			// TODO - use WHERE user_id IN x,y,z instead?
 			$in[] = $house_user['user_id'];
 		}
 		$this->db->where_in('user_id', $in);
