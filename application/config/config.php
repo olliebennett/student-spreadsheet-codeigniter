@@ -14,9 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://offline-studentspreadsheet-codeigniter.com/';
-// $config['base_url']	= 'http://192.168.1.65/';
-// $config['base_url']	= 'http://studentspreadsheet.com/version/ci-0-2/';
+$config['base_url']	= 'http://localhost/';
 
 /*
 |--------------------------------------------------------------------------
@@ -227,7 +225,7 @@ $config['cache_path'] = '';
 | MUST set an encryption key.  See the user guide for info.
 |
 */
-$config['encryption_key'] = 'JP6386£TH03t-G5OK7W%78392)*H45';
+$config['encryption_key'] = '';
 
 /*
 |--------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 $config =
 	array(
 		// set on "base_url" the relative url that point to HybridAuth Endpoint
-		'base_url' => '/auth/endpoint',
+		'base_url' => '/hauth/endpoint',
 
 		"providers" => array (
 			// openid providers
@@ -35,8 +35,9 @@ $config =
 			),
 
 			"Facebook" => array (
-				"enabled" => false,
-				"keys"    => array ( "id" => "", "secret" => "" ),
+				"enabled" => true,
+				"keys"    => array ( "id" => "YOUR_APP_ID", "secret" => "YOUR_APP_SECRET" ),
+				"scope"   => "email",
 			),
 
 			"Twitter" => array (
