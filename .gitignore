@@ -22,6 +22,7 @@ Desktop.ini
 application/logs/log-*.php
 *.log
 
-# Config Files
-application/config/hybridauthlib.php
-application/config/database.php
+# Environment-specific Config Files
+application/config/*/*.php
+application/config/*/*.php
+application/config/*/*.php
