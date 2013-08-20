@@ -23,4 +23,10 @@ The following settings probably require modification, or you can overwrite them.
 	$db['default']['username']
 	$db['default']['password']
 	$db['default']['database']
+
+### `/config/hashids.php`
+
+	$config['hashids_salt'] = 'YOUR_HASHID_SALT';
 	
+See [hashids.org](http://www.hashids.org/php/).
+

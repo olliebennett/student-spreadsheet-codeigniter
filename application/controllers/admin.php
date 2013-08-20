@@ -2,7 +2,12 @@
 
 class Admin extends CI_Controller {
 	
-	private $subnav = array('houses'=>'Houses','users'=>'Users','notifications'=>'Notifications');
+	private $subnav = array(
+		'houses' => 'Houses',
+		'users' => 'Users',
+		'notifications' => 'Notifications',
+		'other' => 'Other'
+	);
 									
 	// Constructor
 	function __construct() {
@@ -116,6 +121,38 @@ class Admin extends CI_Controller {
 		$data['view'] = 'admin/notifications';
 		$this->load->view('template', $data);
 	
+	}
+
+	function other() {
+
+		$this->load->helper('form');
+
+		// Encode/Decode HashIDs
+		$data['hashid_to_decode'] = ($this->input->post('hashid_to_decode')) ? $this->input->post('hashid_to_decode') : '';
+		$data['hashid_to_encode'] = ($this->input->post('hashid_to_encode')) ? $this->input->post('hashid_to_encode') : '';
+
+		$hashid_decoded = hashids_decrypt($data['hashid_to_decode']);
+		if ($hashid_decoded === '' || $hashid_decoded === null) {
+			$data['hashid_decoded'] = 'Decoding Failed';
+		} else {
+			$data['hashid_decoded'] = $hashid_decoded;
+		}
+		$hashid_encoded = hashids_encrypt($data['hashid_to_encode']);
+		if ($hashid_encoded === '' || $hashid_encoded === null) {
+			$data['hashid_encoded'] = 'Encoding Failed';
+		} else {
+			$data['hashid_encoded'] = $hashid_encoded;
+		}
+
+		$data['title'] = 'Other Options';
+		
+		$data['user'] = $this->user;
+				
+		// Send to view
+		$data['subnav'] = $this->subnav;
+		$data['view'] = 'admin/other';
+		$this->load->view('template', $data);
+
 	}
 
 }

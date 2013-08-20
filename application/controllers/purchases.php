@@ -37,15 +37,23 @@ class Purchases extends CI_Controller {
     $opt['order_by'] = ($this->input->get('order_by')) ? $this->input->get('order_by') : $opt_user['purchases_order_by'];
 
     // Get all purchases
-    $data['purchases'] = $this->purchases_model->getPurchases(
+    $purchases = $this->purchases_model->getPurchases(
       $this->user['house_id'],
       $opt
     );
 
     // Add purchase permissions
-    foreach ($data['purchases'] as $pid => $p) {
-      $data['purchases'][$pid]['perm_userCanModify'] = $this->_userCanModify($p);
+    foreach ($purchases as $pid => $p) {
+      $purchases[$pid]['perm_userCanModify'] = $this->_userCanModify($p);
     }
+
+    // Convert purchase IDs to hashids
+    $data['purchases'] = array();
+    foreach ($purchases as $pid => $p) {
+      $p_hash = hashids_encrypt($pid);
+      $data['purchases'][$p_hash] = $p;
+    }
+    
 
     // Calculate housemate balances
     $data['balances'] = $this->_getBalances($data['purchases']);
@@ -123,13 +131,13 @@ class Purchases extends CI_Controller {
           if ($this->input->post('edit_id') && ($edit_id !== FALSE)) {
             // Edited Purchase
             $this->session->set_flashdata('success', 'Purchase edited. ');
-            redirect("purchases/view/$purchase_id");
+            redirect('purchases/view/' . hashids_encrypt($purchase_id));
           } else {
             // New Purchase
-            // Provide link to view purchase, but redirect to add purchase page.
-            //var_dump('added purchase #'.$success.' to database');
-            $this->session->set_flashdata('success', 'Purchase added. View it <a href="'.site_url("purchases/view/$purchase_id").'">here</a> (or see <a href="'.site_url('purchases').'">all purchases</a>).');
-            redirect('purchases/add');            
+            // Provide link to view purchase, but redirect to purchases page.
+            // The just-added purchase should be highlighted anyway
+            $this->session->set_flashdata('success', 'Purchase added. View it <a href="'.site_url('purchases/view/' . hashids_encrypt($purchase_id)).'">here</a> (or <a href="'.site_url('purchases/add').'">add another</a>).');
+            redirect('purchases');            
           }
 
 
@@ -179,11 +187,20 @@ class Purchases extends CI_Controller {
    * - this page also renders the 'add_purchase' view, but with
    *   existing values updated, and with the ID defined in the form.
    */
-  function edit($purchase_id) {
+  function edit($purchase_hash = null) {
+
+    // Check a hash was provided
+    if ($purchase_hash == null) {
+      $this->session->set_flashdata('error', 'No purchase was specified for editing.');
+      redirect('purchases');
+    }
+
+    // Decode hash to purchase ID
+    $purchase_id = hashids_decrypt($purchase_hash);
 
     // Ensure a valid purchase id was given
     if (!is_numeric($purchase_id)) {
-      $this->session->set_flashdata('error', 'Invalid purchase ID was specified for editing.');
+      $this->session->set_flashdata('error', 'Invalid purchase was specified for editing.');
       redirect('purchases');
     }
 
@@ -207,16 +224,16 @@ class Purchases extends CI_Controller {
     }
     if (FALSE == $this->_userCanModify(reset($p))) {
       $this->session->set_flashdata('error', 'Only the creator or payer can edit a purchase.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
     
     // Do not allow editing of deleted purchases or old versions
     if ($p[$purchase_id]['status'] == 'deleted') {
       $this->session->set_flashdata('error', 'Deleted purchases cannot be edited.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     } else if ($p[$purchase_id]['status'] == 'edited') {
       $this->session->set_flashdata('error', 'Previous purchase versions cannot be edited.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
 
     $this->load->helper('form');
@@ -242,22 +259,22 @@ class Purchases extends CI_Controller {
   /*
    * View Purhase
    */
-  function view($purchase_id = NULL) {
-    
-    $this->load->helper('form');
+  function view($purchase_hash = NULL) {
 
-    if ($purchase_id == NULL) {
+    if ($purchase_hash == NULL) {
       $this->session->set_flashdata('error', 'No purchase ID specified.');
       redirect('purchases');
     }
 
+    // Decode hash to purchase ID
+    $purchase_id = hashids_decrypt($purchase_hash);
+
     // Ensure a valid (numeric) purchase id was given
     if (!is_numeric($purchase_id)) {
-      $this->session->set_flashdata('error', 'Invalid purchase ID was specified when viewing details.');
+      $this->session->set_flashdata('error', 'Invalid purchase ID was specified when viewing details. <!-- ID=' . $purchase_id . ' -->');
       redirect('purchases');
     }
 
-    $data['purchase_id'] = $purchase_id;
     $next_purchase_id = $purchase_id;
     $old_purchase_id = NULL;
 
@@ -282,43 +299,53 @@ class Purchases extends CI_Controller {
       }
       
       // Add to purchases array.
-      $data['purchases'][$next_purchase_id] = $next_purchase[$next_purchase_id];
+      $purchases[$next_purchase_id] = $next_purchase[$next_purchase_id];
 
       // Get purchase comments
       $comments = $this->comments_model->getComments($next_purchase_id);
       //d($comments, 'comments');
       if (count($comments) > 0) {
         foreach ($comments as $comment) {
-          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['text'] = $comment['comment_text'];
-          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['added_by'] = $comment['comment_added_by'];
-          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['added_time'] = $comment['comment_added_time'];
-          $data['purchases'][$comment['parent_id']]['comments'][$comment['comment_id']]['type'] = $comment['comment_type'];
+          $purchases[$comment['parent_id']]['comments'][$comment['comment_id']]['text'] = $comment['comment_text'];
+          $purchases[$comment['parent_id']]['comments'][$comment['comment_id']]['added_by'] = $comment['comment_added_by'];
+          $purchases[$comment['parent_id']]['comments'][$comment['comment_id']]['added_time'] = $comment['comment_added_time'];
+          $purchases[$comment['parent_id']]['comments'][$comment['comment_id']]['type'] = $comment['comment_type'];
         }
       }
       
       // Get any changes made to the purchase (apart from on the first purchase!)
       if ($old_purchase_id != NULL) {
-        $data['purchases'][$old_purchase_id]['edit_changes'] = $this->_getPurchaseDifferences($data['purchases'][$next_purchase_id], $data['purchases'][$old_purchase_id], $this->housemates);
+        $purchases[$old_purchase_id]['edit_changes'] = $this->_getPurchaseDifferences($purchases[$next_purchase_id], $purchases[$old_purchase_id], $this->housemates);
       }
       
       $old_purchase_id = $next_purchase_id;
-      $next_purchase_id = $data['purchases'][$next_purchase_id]['edit_parent'];
+      $next_purchase_id = $purchases[$next_purchase_id]['edit_parent'];
             
     } while ($next_purchase_id != NULL);
 
     // Check that (at least) one purchase was found
-    if (count($data['purchases']) == 0) {
+    if (count($purchases) == 0) {
       $this->session->set_flashdata('error', 'No purchase found with this ID.');
       redirect('purchases');
     }
     
-    // Sort the array by its keys
-    ksort($data['purchases']);
+    // Sort the array by its keys (purchase_id)
+    ksort($purchases);
 
     // Add permissions information
-    foreach ($data['purchases'] as $pid => $p) {
-      $data['purchases'][$pid]['perm_userCanModify'] = $this->_userCanModify($p);
+    foreach ($purchases as $pid => $p) {
+      $purchases[$pid]['perm_userCanModify'] = $this->_userCanModify($p);
     }
+
+    // Convert purchase IDs to hashids
+    $data['purchases'] = array();
+    $data['purchase_id'] = hashids_encrypt($purchase_id);
+    foreach ($purchases as $pid => $purchase) {
+      $p_hash = hashids_encrypt($pid);
+      $data['purchases'][$p_hash] = $purchase;
+    }
+
+    $this->load->helper('form');
 
     // Detect required format, and send to view
     if (strtolower($this->input->get('format')) === 'json') {
@@ -334,12 +361,15 @@ class Purchases extends CI_Controller {
 
   }
 
-  function restore($purchase_id = NULL) {
+  function restore($purchase_hash = NULL) {
 
-    if ($purchase_id == NULL) {
+    if ($purchase_hash == NULL) {
       $this->session->set_flashdata('error', 'No purchase specified to be restored.');
       redirect("purchases");
     }
+
+    // Decode hash to purchase ID
+    $purchase_id = hashids_decrypt($purchase_hash);
 
     // Get Purchase info
     $purchase = $this->purchases_model->getPurchaseById($purchase_id);
@@ -353,30 +383,33 @@ class Purchases extends CI_Controller {
     // Verify purchase exists and user has permission.
     if (!$this->_userCanModify(reset($purchase))) {
       $this->session->set_flashdata('error', 'Only the creator or payer can restore a purchase.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
 
     if ($purchase[$purchase_id]['status'] != 'deleted') {
       $this->session->set_flashdata('info', 'This purchase has not been deleted.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
 
     if ($this->purchases_model->restorePurchase($purchase_id, $this->user['user_id'])) {
       $this->session->set_flashdata('success', 'Purchase restored.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     } else {
       $this->session->set_flashdata('error', 'Purchase could not be restored. Please try again later.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
 
   }
 
-  function delete($purchase_id = NULL) {
+  function delete($purchase_hash = NULL) {
 
-    if ($purchase_id == NULL) {
+    if ($purchase_hash == NULL) {
       $this->session->set_flashdata('error', 'No purchase specified for deletion.');
       redirect("purchases");
     }
+
+    // Decode hash to purchase ID
+    $purchase_id = hashids_decrypt($purchase_hash);
 
     // Get Purchase info
     $purchase = $this->purchases_model->getPurchaseById($purchase_id);
@@ -390,20 +423,20 @@ class Purchases extends CI_Controller {
     // Verify purchase exists and user has permission.
     if (!$this->_userCanModify($purchase[$purchase_id])) {
       $this->session->set_flashdata('error', 'Only the creator or payer can delete a purchase.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
 
     if ($purchase[$purchase_id]['status'] == 'deleted') {
       $this->session->set_flashdata('info', 'This purchase is not been deleted, so cannot be restored.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
 
     if ($this->purchases_model->deletePurchase($purchase_id, $this->user['user_id'])) {
-      $this->session->set_flashdata('success', 'Purchase deleted. View it <a href="' . site_url("purchases/view/$purchase_id") . '">here</a> or <a href="' . site_url("purchases/restore/$purchase_id") . '">restore it</a> now.');
+      $this->session->set_flashdata('success', 'Purchase deleted. View it <a href="' . site_url('purchases/view/' . hashids_encrypt($purchase_id)) . '">here</a> or <a href="' . site_url('purchases/restore/' . hashids_encrypt($purchase_id)) . '">restore it</a> now.');
       redirect("purchases");
     } else {
       $this->session->set_flashdata('error', 'Purchase could not be deleted. Please try again later.');
-      redirect("purchases/view/$purchase_id");
+      redirect('purchases/view/' . hashids_encrypt($purchase_id));
     }
 
   }
@@ -411,12 +444,15 @@ class Purchases extends CI_Controller {
   /*
    * Comment on Purhase
    */
-  function addcomment($purchase_id = NULL) {
+  function addcomment($purchase_hash = NULL) {
 
-    if ($purchase_id == NULL) {
+    if ($purchase_hash == NULL) {
       $this->session->set_flashdata('error', 'No comment ID specified to comment on.');
       redirect("purchases");
     }
+
+    // Decode hash to purchase ID
+    $purchase_id = hashids_decrypt($purchase_hash);
 
     // Get Purchase info
     $purchase = $this->purchases_model->getPurchaseById($purchase_id);
@@ -436,11 +472,11 @@ class Purchases extends CI_Controller {
       if ($this->purchases_model->addComment($this->user['user_id'], $purchase_id, $text, $type)) {
         // it worked
         $this->session->set_flashdata('success', "Your $type was added successfully.");
-        redirect("purchases/view/$purchase_id");
+        redirect('purchases/view/' . hashids_encrypt($purchase_id));
       } else {
         // comment save failed
         $this->session->set_flashdata('error', "There was an error saving your $type. Please try again later.");
-        redirect("purchases/view/$purchase_id");
+        redirect('purchases/view/' . hashids_encrypt($purchase_id));
       }
     } else {
       $this->session->set_flashdata('error', 'No comment data received.');
@@ -545,19 +581,20 @@ class Purchases extends CI_Controller {
       if ($filetype == 'csv') {
 
         // CSV Headings
-        $filedata = 'Purchase,Description,Added By,Added Time,Payer,Date,House ID,';
+        $filedata = 'Purchase,Description,Added By,Added Time,Payer,Date,House ID,URL,';
         $filedata .= implode(',',$housemate_names);
         $filedata .= "\n";
 
         // Build CSV Data
         foreach ($purchases as $purchase_id => $purchase) {
-          $filedata .= $purchase_id . ','
+          $filedata .= hashids_encrypt($purchase_id) . ','
                           . filterCsv($purchase['description']) . ','
                           . filterCsv($housemate_names[$purchase['added_by']]) . ','
                           . $purchase['added_time'] . ','
                           . filterCsv($housemate_names[$purchase['payer']]) . ','
                           . $purchase['date']. ','
-                          . $purchase['house_id'].',';
+                          . $purchase['house_id'].','
+                          . site_url('/purchases/view/' . hashids_encrypt($purchase_id)).',';
           foreach ($this->housemates as $housemate) {
             $filedata .= (isset($purchase['payees'][$housemate['user_id']]) ? filterCsv($purchase['payees'][$housemate['user_id']]) : '0') . ',';
           }
@@ -578,7 +615,7 @@ class Purchases extends CI_Controller {
         // Build XML Data
         foreach ($purchases as $purchase_id => $purchase) {
           $filedata .= "\n\t<purchase>";
-          $filedata .= "\n\t\t<id>{$purchase_id}</id>";
+          $filedata .= "\n\t\t<id>" . hashids_encrypt($purchase_id) . "</id>";
           $filedata .= "\n\t\t<description>".filterXml($purchase['description'])."</description>";
           $filedata .= "\n\t\t<added_by>".filterXml($housemate_names[$purchase['added_by']])."</added_by>";
           $filedata .= "\n\t\t<added_time>".$purchase['added_time']."</added_time>";
@@ -597,6 +634,7 @@ class Purchases extends CI_Controller {
             $filedata .= "\n\t\t\t</payee>";
           }
           $filedata .= "\n\t\t</payees>";
+          $filedata .= "\n\t\t<url>" . site_url('/purchases/view/' . hashids_encrypt($purchase_id)) . "</url>";
           $filedata .= "\n\t</purchase>";
         }
 
