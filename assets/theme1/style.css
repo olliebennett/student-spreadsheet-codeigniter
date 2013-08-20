@@ -83,6 +83,8 @@ h1 {
   border:0px;
   padding:0px;
   margin:0px;
+}
+#user_info .user_pic_container {
   float: right;
 }
 .user_pic_container span.user_pic_social_overlay{
