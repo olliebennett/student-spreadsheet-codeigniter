@@ -23,6 +23,6 @@ application/logs/log-*.php
 *.log
 
 # Environment-specific Config Files
-application/config/*/*.php
-application/config/*/*.php
-application/config/*/*.php
+application/config/*/*
+application/config/*/*
+application/config/*/*

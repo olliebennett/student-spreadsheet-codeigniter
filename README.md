@@ -6,27 +6,30 @@ The Student Spreadsheet
 
 ## Requirements
 
-* Apache `mod_rewrite`
-* PHP `curl` extension
+* __Apache__ with `mod_rewrite`
+* __PHP__ with `curl` and `openssl`
+* [__CodeIgniter__](http://ellislab.com/codeigniter) __v2.x__
 
 ## Installation / Configuration
 
-The following settings probably require modification, or you can overwrite them. See [this](http://ellislab.com/codeigniter/user-guide/general/environments.html).
+Settings need updating in the `application/config` folder. Specifically:
 
-### `/config/config.php`
+### `config.php`
 
-	$config['base_url']
-	$config['encryption_key']
+* `$config['base_url']`
+* `$config['encryption_key']`
 	
-### `/config/database.php`
+### `database.php`
 
-	$db['default']['username']
-	$db['default']['password']
-	$db['default']['database']
+* `$db['default']['username']`
+* `$db['default']['password']`
+* `$db['default']['database']`
 
-### `/config/hashids.php`
+### `hashids.php`
 
-	$config['hashids_salt'] = 'YOUR_HASHID_SALT';
-	
-See [hashids.org](http://www.hashids.org/php/).
+* `$config['hashids_salt']`
 
+### `email.php`
+
+* `$config['smtp_user']`
+* `$config['smtp_pass']`

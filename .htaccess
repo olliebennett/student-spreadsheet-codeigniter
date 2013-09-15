@@ -10,7 +10,7 @@ Options -Indexes
 # Remove index.php
 # ----------------------------------------------------------------------
 RewriteEngine on
-RewriteCond $1 !^(index\.php|assets|version|robots\.txt|favicon\.ico)
+RewriteCond $1 !^(index\.php|assets|version|robots\.txt|favicon\.ico|version)
 RewriteRule ^(.*)$ /index.php/$1 [L]
 
 # ----------------------------------------------------------------------
