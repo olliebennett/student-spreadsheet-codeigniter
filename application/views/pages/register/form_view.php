@@ -33,6 +33,8 @@
     </div>
   </div>
 
+  <p>If you have any issues or questions about registering, please <a href="<?php echo site_url('help/contact'); ?>">get in touch</a>!</p>
+
 
 
 </form>

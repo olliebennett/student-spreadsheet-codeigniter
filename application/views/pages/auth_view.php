@@ -22,7 +22,7 @@
 
 <p>Student Spreadsheet never sees your Facebook password.</p>
 
-<p>We <strong>DO NOT</strong> require permission to post to your wall / email your friends / send messages or access unnecessary personal information.</p>
+<p>We <strong>DO NOT</strong> post to your wall / email your friends / send messages from your account or store unnecessary personal information.</p>
 
 <p>Still not happy? Sorry to hear that! Facebook is currently the only option for logging in. If you have comments or questions, please <a href="<?php echo site_url('help/contact'); ?>">get in touch</a>!</p>
 

@@ -123,6 +123,21 @@ class Admin extends CI_Controller {
 	
 	}
 
+	function email() {
+
+		$this->load->model('email_model');
+
+		echo 'sending test email';
+
+		if ($this->email_model->send_email("olliebennett@gmail.com", "Test Email Subject", "Test Email Message")) {
+			echo 'sending worked!';
+		} else {
+			echo 'sending FAILED';
+		}
+
+
+	}
+
 	function other() {
 
 		$this->load->helper('form');

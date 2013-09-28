@@ -53,10 +53,16 @@ if( ! function_exists('hashids_decrypt'))
 {
     function hashids_decrypt($hash, $salt='', $min_hash_length=0, $alphabet='')
     {
+
         $hashids    = hashids_createobject($salt, $min_hash_length, $alphabet);
         $output     = $hashids->decrypt($hash);
-        if(count($output) < 1) return NULL;
-        return (count($output) == 1) ? reset($output) : $output;
+        if (count($output) < 1) {
+            log_message('warning', "hashids_decrypt(): Failed to decrypt hash '$hash'.");
+            return NULL;
+        }
+        $return = (count($output) == 1) ? reset($output) : $output;
+        log_message('debug', "hashids_decrypt(): Decrypted hash '$hash' to '$return'.");
+        return $return;
     }
 }
 

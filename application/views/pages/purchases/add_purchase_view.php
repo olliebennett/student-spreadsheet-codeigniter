@@ -3,11 +3,11 @@
   //d($housemates, 'housemates');
   //d($user, 'user');
   //d(isset($edit) ? $edit : 'N/A', 'edit');
-  //d(isset($repop) ? $repop : 'N/A', 'repop');
+  d(isset($repop) ? $repop : 'N/A', 'repop');
 ?>
 
 
-<?php echo form_open('purchases/add', array('id'=>'purchase_form','class'=>'form-horizontal')); ?>
+<?php echo form_open(current_url(), array('id'=>'purchase_form','class'=>'form-horizontal')); ?>
 
 <?php
 function form_err($err) {
@@ -109,12 +109,10 @@ if (isset($repop['payer'])) {
 <?php
 // Determine whether or not to check this housemate by default
 $checked = FALSE;
-if (isset($repop['split_type'])) {
-  if ($repop['split_type'] == 'even') {
-    if (isset($repop['payees']) && is_array($repop['payees'])) {
-      if (in_array($housemate['user_id'], array_keys($repop['payees']))) {
-          $checked = TRUE;
-      }
+if (isset($repop['split_type']) && $repop['split_type'] == 'even') {
+  if (isset($repop['payees']) && is_array($repop['payees'])) {
+    if (in_array($housemate['user_id'], array_keys($repop['payees']))) {
+        $checked = TRUE;
     }
   }
 } else {
@@ -158,12 +156,22 @@ if (isset($repop['split_type'])) {
 
   <div id="tab-custom">
 <?php foreach ($housemates as $housemate) : ?>
+<?php
+// Determine the amount this housemate pays by default
+$amt = '';
+if (isset($repop['split_type']) && $repop['split_type'] == 'custom') {
+  if (isset($repop['payees'][$housemate['user_id']])) {
+    // Handle case where edit is being made, and only the 'payees' is set
+    $amt = number_format((double)$repop['payees'][$housemate['user_id']], 2);
+  }
+}
+?>
     <div class="control-group">
       <label class="control-label" for="price_custom_<?php echo $housemate['user_id']; ?>"><?php echo $housemate['user_name']; ?></label>
       <div class="controls">
         <div class="input-prepend">
           <label for="price_custom_<?php echo $housemate['user_id']; ?>">
-            <span class="add-on">£</span><input class="input-mini" type="text" name="price_custom[<?php echo $housemate['user_id']; ?>]" id="price_custom_<?php echo $housemate['user_id']; ?>" placeholder="0.00" value="<?php echo (isset($repop['payees'][$housemate['user_id']]) ? number_format((double)$repop['payees'][$housemate['user_id']], 2) : ''); ?>" />
+            <span class="add-on">£</span><input class="input-mini" type="text" name="price_custom[<?php echo $housemate['user_id']; ?>]" id="price_custom_<?php echo $housemate['user_id']; ?>" placeholder="0.00" value="<?php echo $amt; ?>" />
           </label>
         </div>
       </div>
@@ -258,16 +266,28 @@ if (isset($repop['split_type'])) {
   $("#btn-split-even").trigger('click');
 <?php endif; ?>
 
-    // Enhance Date input with date picker
-    var purchase_date_input = $('#purchase_date').pickadate({
-      format: 'dddd, dd mmm, yyyy', // visible format
-      formatSubmit: 'yyyy/mm/dd' // submitted format
-    });
+  // Enhance Date input with date picker
+  var purchase_date_input = $('#purchase_date').pickadate({
+    format: 'dddd, dd mmm, yyyy', // visible format
+    formatSubmit: 'yyyy/mm/dd' // submitted format
+  });
 
-    // Set date to the current or pre-set value
-    var purchase_date = purchase_date_input.data('pickadate');
+  // Set date to the current or pre-set value
+  var purchase_date = purchase_date_input.data('pickadate');
 <?php $d = (isset($repop['date']) && $repop['date'] != '') ? $repop['date'] : date('Y/m/d'); ?>
-    purchase_date.setDate( <?php echo substr($d, 0, 4); ?>, <?php echo substr($d, 5, 2); ?>, <?php echo substr($d, 8, 2); ?> );
+  purchase_date.setDate( <?php echo substr($d, 0, 4); ?>, <?php echo substr($d, 5, 2); ?>, <?php echo substr($d, 8, 2); ?> );
+
+  // Specify validation rules
+  $("#purchase_form").validate({
+    messages: {
+      description: "Please enter a purchase description",
+      email: {
+        required: "We need your email address to contact you",
+        email: "Your email address must be in the format of name@domain.com"
+      }
+    }
+  });
+
   </script>
 
   <div class="control-group">

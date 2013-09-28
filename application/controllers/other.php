@@ -85,9 +85,9 @@ class Other extends CI_Controller {
 						'user_id' => 2,
 						'price' => 20
 					)
-				),
-				'comment' => ''
-			)
+				)
+			),
+			'comment' => ''
 		);
 
 		$purchases[] = array(
@@ -95,7 +95,7 @@ class Other extends CI_Controller {
 			'house_id' => 1,
 			'data' => array(
 				'description' => 'Shopping Trip',
-				'payer' => 3,
+				'payer' => 2,
 				'purchase_date' => "2013/07/24",
 				'split_type' => "custom",
 				'payees' => array(
@@ -111,9 +111,9 @@ class Other extends CI_Controller {
 						'user_id' => 3,
 						'price' => 5.55
 					)
-				),
-				'comment' => 'Beer, Honey, Garlic Bread, Milk. Delicious!'
-			)
+				)
+			),
+			'comment' => 'Beer, Honey, Garlic Bread and Pizza. Delicious!'
 		);
 
 		$purchases[] = array(
@@ -137,9 +137,9 @@ class Other extends CI_Controller {
 						'user_id' => 3,
 						'price' => 15
 					)
-				),
-				'comment' => 'Have confirmed our details over the phone, and set up a direct debit.'
-			)
+				)
+			),
+			'comment' => 'Have confirmed our details over the phone, and set up a direct debit.'
 		);
 
 		$this->load->model('purchases_model');

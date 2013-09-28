@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <?php $this->load->view('includes/header_meta'); ?>
 
@@ -18,6 +18,10 @@
   <!-- jQuery -->
   <script src="<?php echo base_url ();?>assets/lib/jquery/jquery.min.js"></script>
 
+  <!-- jQuery Form + Validation -->
+  <script src="<?php echo base_url ();?>assets/lib/jquery-form/jquery.form.js"></script>
+  <script src="<?php echo base_url ();?>assets/lib/jquery-validation/jquery.validate.js"></script>
+
   <!-- jQuery TimeAgo -->
   <script src="<?php echo base_url ();?>assets/lib/jquery-timeago/jquery.timeago.js"></script>
   <script>jQuery.timeago.settings.allowFuture = true;</script>
@@ -32,9 +36,6 @@
   <link href='<?php echo base_url ();?>assets/lib/jquery-select2/select2.css' rel="stylesheet">
   <script src="<?php echo base_url ();?>assets/lib/jquery-select2/select2.js"></script>
 <?php endif; ?>
-
-  <!-- jQuery Plugin: Validate
-  <script src="<?php echo base_url(); ?>assets/js/jquery.validate.js"></script>-->
 
   <!-- Bootstrap -->
   <script src="<?php echo base_url(); ?>assets/lib/bootstrap/js/bootstrap.js"></script>

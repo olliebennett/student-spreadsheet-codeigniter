@@ -27,7 +27,7 @@
 <ol>
 	<li>Record payments such as utility bills, including the price and which friends should contribute.</li>
 	<li>Track how much you owe (or are owed) in total.</li>
-	<li>Automatically calculate out who owes what, and settle-up in simple payments at the end!</li>
+	<li>Automatically calculate who owes what, and settle-up in simple payments at the end!</li>
 </ol>
 
 <p>

@@ -167,17 +167,33 @@ class Users_model extends CI_Model {
 
 		if (count($fbusers) !== 1) {
 			return FALSE;
-		} else { // Only 1 entry found
-			// Move configuration items into sub-array
-			foreach ($fbusers[0] as $k => $v) {
-				if (substr($k, 0, 5) === 'conf_') {
-					$fbuser['conf'][substr($k,5)] = $v;
-				} else {
-					$fbuser[$k] = $v;
-				}
-			}
-			return $fbuser;
 		}
+
+		// Only 1 entry found
+		return $fbusers[0];
+		// return $this->parseUserData($fbusers[0]);
+
+	}
+
+	function parseUserData($user_raw) {
+
+		$user = array();
+
+		// Process all raw values, and build into (deep) array
+		foreach ($user_raw as $k => $v) {
+			// Move configuration items into sub-array
+			if (substr($k, 0, 5) === 'conf_') {
+				if (substr($k, 5, 2) == 'n_') {
+					$user['conf']['notifications'][substr($k, 7)] = $v;
+				} else {
+					$user['conf'][substr($k,5)] = $v;
+				}
+			} else {
+				$user[$k] = $v;
+			}
+		}
+		return $user;
+
 	}
 
 	/**
@@ -188,6 +204,7 @@ class Users_model extends CI_Model {
 
 		if (ENVIRONMENT == 'demo') {
 			return array(
+				// avoid 1 as this is (by default) the admin's account ID
 				2 => "User Two",
 				3 => "User Three",
 				4 => "User Four",
