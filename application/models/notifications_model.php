@@ -28,5 +28,54 @@ class Notifications_model extends CI_Model {
 
     }
 
+    function sendNotification($action, $user, $housemates, $d) {
+
+        //d($action, 'action');
+        //d($user, 'user');
+        //d($housemates, 'housemates');
+        //d($d, 'data');
+        //die();
+
+        log_message('debug',"sending '$action' notification");
+
+        // Confirm valid action
+        if (!in_array($action, array_keys($this->config->item('notification_options')))) {
+            log_message("error", "Invalid action when sending notification. Must be one of '" . implode("','", array_keys($this->config->item('notification_options'))) . "'");
+            return;
+        }
+
+        foreach ($housemates as $housemate) {
+            
+            if (strpos($housemate['conf_n_'.$action],'email') != -1
+                && $housemate['user_email'] != NULL) {
+                
+                log_message("debug", "Sending email to a housemate!");
+
+                $message = "";
+
+                switch ($action) {
+
+                    case 'purchase_add':
+                        $message .= "<p>A purchase was just added by " . $user['user_name'] . ".</p>";
+                        $message .= "<p>" . $d['description'] . "</p>";
+                        $message .= "<p>Paid by: " . $housemates[$d['payer']]['user_name'] . " on " . $d['purchase_date'] . "</p>";
+                        break;
+                    default:
+                        log_message("error", "Unhandled action: '" + $action + "'");
+
+                }
+
+                $this->load->model('email_model');
+                $this->email_model->send_email($housemate['user_email'], "New Purchase from STSP", $message);
+
+                if ($housemate['user_id'] == $user['user_id']) {
+
+                }
+            }
+
+        }
+
+    }
+
 }
 // EOF

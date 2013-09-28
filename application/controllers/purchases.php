@@ -29,12 +29,11 @@ class Purchases extends CI_Controller {
     // by default, use GET parameters,
     // otherwise use user's setting or sys default.
     $opt = array();
-    $opt_user = $this->user['conf'];
     // show - deleted or all purchases
     $opt['show'] = ($this->input->get('show') == 'deleted') ? 'deleted' : 'ok';
     // user purchase display options
-    $opt['order'] = ($this->input->get('order')) ? $this->input->get('order') : $opt_user['purchases_order'];
-    $opt['order_by'] = ($this->input->get('order_by')) ? $this->input->get('order_by') : $opt_user['purchases_order_by'];
+    $opt['order'] = ($this->input->get('order')) ? $this->input->get('order') : $this->user['conf_purchases_order'];
+    $opt['order_by'] = ($this->input->get('order_by')) ? $this->input->get('order_by') : $this->user['conf_purchases_order_by'];
 
     // Get all purchases
     $purchases = $this->purchases_model->getPurchases(
@@ -96,54 +95,7 @@ class Purchases extends CI_Controller {
 
     if ($this->input->post()) {
 
-      $data = $this->_validatePurchase();
-
-      if (!isset($data['error'])) {
-
-        // Use "edit" parent, if present
-        if ($this->input->post('edit_id')) {
-          $edit_id = $this->_verifyPurchasePermissions($this->input->post('edit_id'), $this->user['user_id']);
-          if ($edit_id === FALSE) {
-            $this->session->set_flashdata('error', 'Edit failed. You do not have permissions to edit this purchase (or it was not found).');
-            redirect('purchases');
-          } else {
-            // Add edit_id to purchase_details
-            $data['purchase_details']['edit_parent'] = $edit_id;
-          }
-        }
-
-        // Fetch user's house
-        $house_id = $this->users_model->getUserHouseSelected($this->user['user_id']);
-
-        // Add purchase to database
-        $purchase_id = $this->purchases_model->addPurchase($this->user['user_id'], $house_id, $data['purchase_details']);
-        // Check for failure adding purchase
-        if ($purchase_id != FALSE) {
-
-          // Add comment to database (if any)
-          //d($data['purchase_details']['comment'], 'data-comment');
-          if ($data['purchase_details']['comment'] != '') {
-            // TODO - what happens when adding comment fails?
-            $this->comments_model->addComment($purchase_id, $data['purchase_details']['comment'], $this->user['user_id']);
-          }
-          
-          // Forward user depending on whether it's a new purchase, or an edit
-          if ($this->input->post('edit_id') && ($edit_id !== FALSE)) {
-            // Edited Purchase
-            $this->session->set_flashdata('success', 'Purchase edited. ');
-            redirect('purchases/view/' . hashids_encrypt($purchase_id));
-          } else {
-            // New Purchase
-            // Provide link to view purchase, but redirect to purchases page.
-            // The just-added purchase should be highlighted anyway
-            $this->session->set_flashdata('success', 'Purchase added. View it <a href="'.site_url('purchases/view/' . hashids_encrypt($purchase_id)).'">here</a> (or <a href="'.site_url('purchases/add').'">add another</a>).');
-            redirect('purchases');            
-          }
-
-
-        }
-
-      }
+      $data = $this->_savePurchase();
 
     } else if ($this->input->get('s')) { // split type (s) is required
       $repop['description'] = $this->input->get('d','');
@@ -169,7 +121,7 @@ class Purchases extends CI_Controller {
       $data['repop'] = $repop;
     }
 
-    if (isset($data['repop']) && isset($data['repop']['description']) && ($data['repop']['description'] == 'Repayment')) {
+    if (isset($data['repop']['description']) && ($data['repop']['description'] == 'Repayment')) {
       $data['title'] = "Add Repayment";
     } else {
       $data['title'] = "Add Purchase";
@@ -206,8 +158,6 @@ class Purchases extends CI_Controller {
 
     // Get purchase details
     $p = $this->purchases_model->getPurchaseById($purchase_id);
-
-    //d($p, 'p');
 
     // Check that (exactly) one purchase was found
     if (count($p) == 1) {
@@ -249,7 +199,7 @@ class Purchases extends CI_Controller {
 
     $data['title'] = 'Edit Purchase';
     $data['user'] = $this->user;
-    $data['purchase_id'] = $purchase_id;
+    $data['purchase_id'] = hashids_encrypt($purchase_id);
     $data['housemates'] = $this->housemates;
     $data['view'] = 'purchases/add_purchase';
     $this->load->view('template', $data);
@@ -257,7 +207,7 @@ class Purchases extends CI_Controller {
   }
 
   /*
-   * View Purhase
+   * View Purchase
    */
   function view($purchase_hash = NULL) {
 
@@ -442,7 +392,7 @@ class Purchases extends CI_Controller {
   }
 
   /*
-   * Comment on Purhase
+   * Comment on Purchase
    */
   function addcomment($purchase_hash = NULL) {
 
@@ -671,6 +621,11 @@ class Purchases extends CI_Controller {
     // Return results in an array
     $ret = array();
 
+    // Retain edit metadata, if found
+    if ($this->input->post('edit_id') !== FALSE) {
+      $repop['edit_id'] = $this->input->post('edit_id');
+    }
+
     // Validate: "description"
     $repop['description'] = htmlspecialchars(trim($this->input->post('description')));
     if (!$repop['description']) {
@@ -798,6 +753,75 @@ class Purchases extends CI_Controller {
     $ret['purchase_details'] = $purchase_details;
 
     return $ret;
+
+  }
+
+  function _savePurchase() {
+
+    $data = $this->_validatePurchase();
+
+    if (!isset($data['error'])) {
+
+      // Use "edit" parent, if present
+      if ($this->input->post('edit_id')) {
+        $edit_id = $this->_verifyPurchasePermissions($this->input->post('edit_id'), $this->user['user_id']);
+        if ($edit_id === FALSE) {
+          $this->session->set_flashdata('error', 'Edit failed. You do not have permissions to edit this purchase (or it was not found).');
+          redirect('purchases');
+        } else {
+          // Add edit_id to purchase_details
+          $data['purchase_details']['edit_parent'] = $edit_id;
+        }
+      }
+
+      // Fetch user's house
+      $house_id = $this->users_model->getUserHouseSelected($this->user['user_id']);
+
+      // Add purchase to database
+      $purchase_id = $this->purchases_model->addPurchase($this->user['user_id'], $house_id, $data['purchase_details']);
+      // Check for failure adding purchase
+      if ($purchase_id != FALSE) {
+
+        // Send notification, if any
+        $this->load->model('notifications_model');
+
+        // Add comment to database (if any)
+        //d($data['purchase_details']['comment'], 'data-comment');
+        if ($data['purchase_details']['comment'] != '') {
+          // TODO - what happens when adding comment fails?
+          $this->comments_model->addComment($purchase_id, $data['purchase_details']['comment'], $this->user['user_id']);
+        }
+        
+        // Forward user depending on whether it's a new purchase, or an edit
+        if ($this->input->post('edit_id') && ($edit_id !== FALSE)) {
+          
+          // Edited Purchase
+
+          // Send notifications
+          $this->notifications_model->sendNotification('purchase_edit', $this->user, $this->housemates, $data['purchase_details']);
+
+          $this->session->set_flashdata('success', 'Purchase edited. ');
+          redirect('purchases/view/' . hashids_encrypt($purchase_id));
+
+        } else {
+          
+          // New Purchase
+
+          // Send notifications
+          $this->notifications_model->sendNotification('purchase_add', $this->user, $this->housemates, $data['purchase_details']);
+
+          // Provide link to view purchase, but redirect to purchases page.
+          // The just-added purchase should be highlighted anyway
+          $this->session->set_flashdata('success', 'Purchase added. View it <a href="'.site_url('purchases/view/' . hashids_encrypt($purchase_id)).'">here</a> (or <a href="'.site_url('purchases/add').'">add another</a>).');
+          redirect('purchases');            
+        }
+
+
+      }
+
+    }
+
+    return $data;
 
   }
   

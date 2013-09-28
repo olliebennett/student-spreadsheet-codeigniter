@@ -31,6 +31,11 @@ class Settings extends CI_Controller {
     // 
     if (isset($data['settings']) && !isset($data['error'])) {
 
+      log_message("info", "Updating settings...");
+
+      d($this->input->post(), 'raw post data');
+      d($data['settings'], 'validated settings');
+
       // Get updated purchases
       //$new_settings = array_diff_assoc($data['settings'], $this->user['conf']);
 
@@ -43,6 +48,7 @@ class Settings extends CI_Controller {
           case 'house_id':
             $update['house_id'] = $setting_val;
             $this->user['house_id'] = $setting_val;
+            break;
           case 'user_email':
             $update['user_email'] = $setting_val;
             $this->user['user_email'] = $setting_val;
@@ -63,12 +69,20 @@ class Settings extends CI_Controller {
             $update['conf_purchases_per_page'] = $setting_val;
             $this->user['conf']['purchases_per_page'] = $setting_val;
             break;
-
+          default:
+            // process notification option arrays
+            if (substr($setting_key, 0, 7) == 'conf_n_') {
+              $update[$setting_key] = $setting_val;
+            }
+            log_message("warn", "Unrecognised setting parameter: '$setting_key'");
         }
       }
       
       // Record that user has saved their settings!
       $update['conf_seensettings'] = 1;
+
+      //d($update, 'array for updating database...');
+      //die();
 
       // Save to database
       $this->db->where('user_id', $this->user['user_id']);
@@ -107,6 +121,47 @@ class Settings extends CI_Controller {
     $this->user = $this->users_model->getUser(TRUE, TRUE, TRUE);
     $this->session->set_flashdata('info', 'Your details were updated from Facebook.');
     redirect('settings');
+
+  }
+
+  function unsubscribe($email = null, $hash = null) {
+
+    if (!$email || !$hash) {
+      show_error("There was a problem with the request.");
+    }
+
+    $email = urldecode($email);
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      show_error("An invalid email address was supplied");
+    }
+
+    $this->load->model('email_model');
+    if (!$this->email_model->_validateUnsubscribeUrl($email, $hash)) {
+      show_error("There was a problem validating the email and hash provided.");
+    }
+
+    $data['email'] = "olliebennett@gmail.com";
+
+    if ($this->input->post('confirm')) {
+      
+      // Unsubscribe any instance of this email address in the database
+      $this->email_model->unsubscribe($email);
+
+      // Send user home.
+      $this->session->set_flashdata('success', "You have successfully unsubscribed <b>$email</b> from all notifications.");
+      redirect(); 
+
+    }
+
+    $data['view'] = 'settings/unsubscribe_confirm';
+    
+    // Get user details
+    $data['user'] = $this->user;
+    
+    $data['title'] = "Unsubscribe";
+    $this->load->helper('form');
+    $this->load->view('template', $data);
 
   }
 
@@ -180,6 +235,32 @@ class Settings extends CI_Controller {
         $settings['user_mobile'] = $valid_phone;
       }
     }
+
+    // Validate: "notification" settings
+    //$repop['notification'] = $this->input->post('notification');
+
+    // We do this whether it's defined or not, 
+    // ... because if user has unticked all checkboxes, "notification" is not sent
+    foreach (array_keys($this->config->item('notification_options')) as $nkey) {
+      // Check if this key was specified
+      $repop["conf_n_$nkey"] = $this->input->post("conf_n_$nkey");
+      if (FALSE !== $repop["conf_n_$nkey"]) {
+        // If so, user ticked (at least) one method (email/sms/etc).
+        foreach ($this->config->item('notification_methods') as $nmet) {
+          if (isset($repop["conf_n_$nkey"][$nmet[0]])) {
+            // Build a comma-separated list of the methods (for MySQL 'SET' field)
+            if (isset($settings["conf_n_$nkey"])) {
+              $settings["conf_n_$nkey"] .= ',' . $nmet[0];
+            } else {
+              $settings["conf_n_$nkey"] = $nmet[0];
+            }
+          }
+        }
+      } else {
+        $settings["conf_n_$nkey"] = null;
+      }
+    }
+
 
     $ret['repop'] = $repop;
     if (isset($error)) {

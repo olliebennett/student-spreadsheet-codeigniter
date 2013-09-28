@@ -46,6 +46,7 @@
         <img src="https://graph.facebook.com/<?php echo $housemate['social_identifier_facebook']; ?>/picture" class="img-polaroid">
         <strong><?php echo $housemate['user_name']; ?></strong><!-- <?php echo 'ID: ' . $housemate['user_id']; ?> -->
 <?php endforeach; ?>
+        <!--<span class="help-block">Housemates cannot be added or removed.</span>-->
       </div>
 <?php endforeach; ?>
     </div>
@@ -74,8 +75,6 @@
     </script>
 
   </fieldset>
-
-
 
   <fieldset>
 
@@ -113,15 +112,13 @@
 -->
   </fieldset>
 
-<!--
-
   <fieldset>
 
     <legend>Notification Settings</legend>
 
     <div class="control-group">
       <div class="controls">
-        <span>Enter an email address and/or UK mobile number to enable notifications.</span>
+        <span>Enter an email address <!--and/or UK mobile number -->to enable notifications.</span>
       </div>
     </div>
 
@@ -130,7 +127,7 @@
       <div class="controls">
         <div class="input-prepend">
           <span class="add-on"><i class="icon-envelope"></i></span>
-          <input class="span2" id="user_email" name="user_email" type="email" placeholder="ollie@stsp.info" value="<?php echo (isset($repop['user_email']) ? $repop['user_email'] : (isset($user['user_email']) ? $user['user_email'] : '')); ?>">>
+          <input class="span3" id="user_email" name="user_email" type="email" placeholder="ollie@stsp.info" value="<?php echo (isset($repop['user_email']) ? $repop['user_email'] : (isset($user['user_email']) ? $user['user_email'] : '')); ?>">>
         </div>
 <?php if (($user['user_email_facebook'] != '') && ($user['user_email_facebook'] != $user['user_email'])) : ?>
         <span class="help-inline" id="fb_email_hint"> <i class="icon-caret-left"></i> <a href="#" id="fb_email_fill"><?php echo $user['user_email_facebook']; ?></a> <?php echo helptip('Email address retrieved from Facebook.', 'right'); ?></span>
@@ -145,6 +142,7 @@
       </div>
     </div>
 
+    <!--
     <div class="control-group">
       <label class="control-label" for="user_mobile">Mobile Number</label>
       <div class="controls">
@@ -163,40 +161,75 @@ if (isset($repop['user_mobile'])) {
         <span class="help-inline"><?php echo helptip('Enter a number beginning \'+447\' or \'07\'. Only UK mobile numbers are currently supported.', 'right'); ?></span>
       </div>
     </div>
+    -->
 
     <div class="control-group">
       <div class="controls">
-        <span class="help-inline">When a purchase is <em>added</em> by a housemate:</span>
-        <label class="checkbox inline">
-          <input type="checkbox" name="notification[added][email]" id="abc1"> <i class="icon-envelope"></i>
-        </label>
-        <label class="checkbox inline">
-          <input type="checkbox" name="notification[added][sms]" id="abc2"> <i class="icon-globe"></i>
-        </label>
-      </div>
-      <div class="controls">
-        <span class="help-inline">When a purchase is <em>disputed</em> by a housemate:</span>
-        <label class="checkbox inline">
-          <input type="checkbox" name="notification[disputed][email]" id="abc1"> Email
-        </label>
-        <label class="checkbox inline">
-          <input type="checkbox" name="notification[disputed][sms]" id="abc2"> SMS
-        </label>
-      </div>
-      <div class="controls">
-        <span class="help-inline">When a purchase is <em>deleted</em> by a housemate:</span>
-        <label class="checkbox inline">
-          <input type="checkbox" name="notification[deleted][email]" id="abc1thautode"> Email
-        </label>
-        <label class="checkbox inline">
-          <input type="checkbox" name="notification[deleted][sms]" id="abc2"> SMS
-        </label>
+        <table id="settings_notification" class="table table-condensed table-hover table-bordered">
+        <tr>
+          <th>Notification Option</th>
+<?php foreach ($this->config->item('notification_methods') as $n_met) : ?>
+          <th><i class="icon-<?php echo $n_met[1]; ?>" title="Receive <?php echo $n_met[2]; ?> notifications"></i></th>
+<?php endforeach; ?>
+        </tr>
+<?php foreach ($this->config->item('notification_options') as $n_key => $n_str) : ?>
+        <tr>
+          <td>
+            <?php echo $n_str; ?>:
+          </td>
+<?php foreach ($this->config->item('notification_methods') as $n_met) : ?>
+          <td class="checkbox-container">
+            <label>
+              <input type="checkbox" name="conf_n_<?php echo $n_key; ?>[<?php echo $n_met[0]; ?>]" <?php
+if (strpos($user['conf_n_'.$n_key], $n_met[0]) !== FALSE) {
+  echo "checked";
+}
+?>>
+            </label>
+          </td>  
+<?php endforeach; ?>
+        </tr>
+<?php endforeach; ?>
+        </table>
       </div>
     </div>
 
-  </fieldset>
+<!--
 
--->
+      <div class="controls">
+
+        <span class="help-inline">Purchase <em>disputed</em> by a housemate:</span>
+        <label class="checkbox inline">
+          <input type="checkbox" name="notification[disputed][email]"> <i class="icon-envelope"></i>
+        </label>
+        <label class="checkbox inline">
+          <input type="checkbox" name="notification[disputed][web]"> <i class="icon-globe"></i>
+        </label>
+        <label class="checkbox inline">
+          <input type="checkbox" name="notification[deleted][sms]"> <i class="icon-mobile-phone"></i>
+        </label>
+      </div>
+      <div class="controls">
+        <span class="help-inline">Purchase is <em>deleted</em> by a housemate:</span>
+        <label class="checkbox inline">
+          <input type="checkbox" name="notification[deleted][email]"> <i class="icon-envelope"></i>
+        </label>
+        <label class="checkbox inline">
+          <input type="checkbox" name="notification[deleted][sms]"> <i class="icon-globe"></i>
+        </label>
+      </div>
+      <div class="controls">
+        <span class="help-inline">General StudentSpreadsheet Announcement:</span>
+        <label class="checkbox inline">
+          <input type="checkbox" name="notification[news][email]"> <i class="icon-envelope"></i>
+        </label>
+        <label class="checkbox inline">
+          <input type="checkbox" name="notification[news][sms]"> <i class="icon-globe"></i>
+        </label>
+      </div>
+      -->
+
+  </fieldset>
 
   <div class="control-group">
     <div class="controls">

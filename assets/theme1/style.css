@@ -136,3 +136,22 @@ span#price_split_indicator {
 span#accordion-toggle-all {
 	cursor: pointer;
 }
+table#settings_notification {
+	table-layout: fixed;
+	width: auto;
+}
+table#settings_notification td label {
+	display: block;
+	cursor: pointer;
+	text-align: center;
+	padding: 3px;
+	margin: 0px;
+}
+table#settings_notification td.checkbox-container {
+	text-align: center;
+	padding: 0px;
+}
+table#settings_notification td label input {
+	margin: 0px;
+	padding: 0px;
+}
