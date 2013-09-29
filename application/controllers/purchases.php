@@ -166,7 +166,6 @@ class Purchases extends CI_Controller {
       $this->session->set_flashdata('error', 'No purchase found with this ID.');
       redirect('purchases');
     }
-
     
     if (FALSE == $this->_userCanView($p[$purchase_id])) {
       $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
@@ -184,6 +183,12 @@ class Purchases extends CI_Controller {
     } else if ($p[$purchase_id]['status'] == 'edited') {
       $this->session->set_flashdata('error', 'Previous purchase versions cannot be edited.');
       redirect('purchases/view/' . hashids_encrypt($purchase_id));
+    }
+
+    if ($this->input->post()) {
+
+      $data = $this->_savePurchase();
+
     }
 
     $this->load->helper('form');
@@ -234,11 +239,11 @@ class Purchases extends CI_Controller {
       // Get purchase details
       $next_purchase = $this->purchases_model->getPurchaseById($next_purchase_id);
       
-      //d($next_purchase, 'next purchase');
+      d_log($next_purchase, 'next purchase');
       
       // Was purchase found, and has user got permission to view it?
       if ($next_purchase === FALSE || FALSE == $this->_userCanView($next_purchase[$next_purchase_id])) {
-        $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.');
+        $this->session->set_flashdata('error', 'Purchase does not exist, or you are not allowed to view it.<!-- ERR:view-purchase-not-exist id= ' . $next_purchase_id . '-->');
         redirect('purchases');
       }
       
