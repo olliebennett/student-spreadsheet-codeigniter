@@ -60,6 +60,8 @@ class Purchases_model extends CI_Model {
     function getPurchaseById($purchase_id)
     {
 
+        log_message("debug", "Getting purchase with ID='$purchase_id'");
+
         $this->db->select('*'); // TODO - specify required fields?
         $this->db->from('purchases p');
         $this->db->join('link_purchases_users lpu', 'lpu.purchase_id = p.purchase_id');

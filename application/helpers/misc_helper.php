@@ -2,13 +2,14 @@
 
 /* Display variable */
 function d($d,$name = 'Unspecified Variable'){
-	echo "<code>$name :</code><br />";
-	var_dump($d);
+	echo "<code>$name :</code><pre>";
+	print_r($d);
+	echo "</pre>";
 }
 
 function d_log($d, $name = 'Unspecified Variable') {
-	log_message('debug', "# variable '$name' =");
-	log_message('debug', print_r($d, TRUE));
+	log_message('info', "# variable '$name' =");
+	log_message('info', print_r($d, TRUE));
 }
 
 function filterCsv($str) {
@@ -78,7 +79,7 @@ function render_price($val, $currency_html = '&#163;')
   $cur_units = str_replace('-','',$arr[0]);
   $cur_decimals = $arr[1];
 
-  return "<!-- $val -->" . ((abs($val) >= 0.005 && $val < 0) ? '-' : '<!--+-->') . '&nbsp;' . $currency_html . '&nbsp;' . '<span class="cur_units">' . $cur_units . '</span>.<span class="cur_decimals">' . $cur_decimals . '</span>';
+  return ((abs($val) >= 0.005 && $val < 0) ? '-' : '<!--+-->') . $currency_html . '&nbsp;' . '<span class="cur_units">' . $cur_units . '</span>.<span class="cur_decimals">' . $cur_decimals . '</span>';
 
 }
 

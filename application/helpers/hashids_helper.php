@@ -38,7 +38,12 @@ if( ! function_exists('hashids_encrypt'))
         if( !is_array($input) ) $input = array( intval($input) );
 
         $hashids = hashids_createobject($salt, $min_hash_length, $alphabet);
-        return call_user_func_array( array($hashids, "encrypt"), $input );
+
+        $return = call_user_func_array( array($hashids, "encrypt"), $input );
+
+        log_message('info', "hashids_encrypt(): Encrypted ID '" . $input[0] . "' to '$return'.");
+
+        return $return;
     }
 }
 
@@ -61,7 +66,7 @@ if( ! function_exists('hashids_decrypt'))
             return NULL;
         }
         $return = (count($output) == 1) ? reset($output) : $output;
-        log_message('debug', "hashids_decrypt(): Decrypted hash '$hash' to '$return'.");
+        log_message('info', "hashids_decrypt(): Decrypted HASH '$hash' to '$return'.");
         return $return;
     }
 }
