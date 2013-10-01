@@ -1,4 +1,4 @@
-<p class="lead">Welcome to The Student Spreadsheet...</p>
+<h3>Welcome to The Student Spreadsheet...</h3>
 
 <?php if (ENVIRONMENT == 'demo') : ?>
 
@@ -19,34 +19,38 @@
 
 <ul>
 	<li>a free, easy-to-use online expenses manager.</li>
-	<li>removes the hassle of remembering who owes what.</li>
+	<li>remove the hassle of remembering who owes what.</li>
 	<li>share costs with your housemates - without the maths!</li>
 </ul>
 
-<p>It's as simple as...</p>
+<p>
+<?php if ((ENVIRONMENT != 'demo') && @is_null($user)) : ?>
+<a href="http://studentspreadsheet.com/auth" class="btn btn-primary">Login</a> 
+<?php endif; ?>
+<?php if (ENVIRONMENT == 'demo') : ?>
+<br />Use the navigation links above to explore the demo, or 
+<?php else : ?>
+<a href="http://demo.studentspreadsheet.com/" class="btn btn-inverse">Explore the DEMO</a> 
+<?php endif; ?>
+<a href="http://studentspreadsheet.com/register" class="btn btn-success">Register!</a>
+</p>
+
+<p><strong>How it works:</strong></p>
 <ol>
 	<li>Record payments such as utility bills, including the price and which friends should contribute.</li>
 	<li>Track how much you owe (or are owed) in total.</li>
 	<li>Automatically calculate who owes what, and settle-up in simple payments at the end!</li>
 </ol>
 
-<p>
-<?php if (ENVIRONMENT == 'demo') : ?>
-Use the navigation links above to explore the demo, or 
-<?php else : ?>
-<a href="http://demo.studentspreadsheet.com/" class="btn btn-primary">Explore the DEMO</a> or 
-<?php endif; ?>
-<a href="http://studentspreadsheet.com/register" class="btn btn-success">Get Started!</a></p>
-
-<p>An easy example:<p>
+<p><strong>An example:</strong><p>
 <ul>
-	<li>Three flatmates - Alice, Bob and Charlie - live together in shared accommodation.</li>
-	<li>Bob pays a £60 electricity bill.</li>
-	<li>Alice buys the TV license for £120.</li>
-	<li>Charlie pays £30/month for internet.</li>
+	<li>Three flatmates - <em>Alice</em>, <em>Bob</em> and <em>Charlie</em> - live together in shared accommodation.</li>
+	<li>Bob pays a <?php echo render_price(60); ?> electricity bill.</li>
+	<li>Alice buys the TV license for <?php echo render_price(120); ?>.</li>
+	<li>Charlie pays <?php echo render_price(30); ?>/month for internet.</li>
 	<li>Three months later, they move out. Student Spreadsheet tells them the quickest way to repay:
 		<ul>
-			<li>Bob pays Alice £30.</li>
+			<li>Bob pays Alice <?php echo render_price(30); ?>.</li>
 		</ul>
 	</li>
 	<li>All housemates are now even!</li>

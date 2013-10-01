@@ -3,7 +3,7 @@
   //d($housemates, 'housemates');
   //d($user, 'user');
   //d(isset($edit) ? $edit : 'N/A', 'edit');
-  d(isset($repop) ? $repop : 'N/A', 'repop');
+  //d(isset($repop) ? $repop : 'N/A', 'repop');
 ?>
 
 

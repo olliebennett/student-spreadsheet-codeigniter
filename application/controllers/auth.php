@@ -32,7 +32,9 @@ class Auth extends CI_Controller {
 				$data['providers'][$provider]['user_profile'] = $this->hybridauthlib->authenticate($provider)->getUserProfile();
 			}
 		}
-		$data['title'] = 'Login';
+
+		$data['title'] = 'Authentication';
+		
 		$this->load->view('template', $data);
 	}
 
