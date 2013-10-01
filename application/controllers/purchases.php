@@ -769,7 +769,7 @@ class Purchases extends CI_Controller {
 
       // Use "edit" parent, if present
       if ($this->input->post('edit_id')) {
-        $edit_id = $this->_verifyPurchasePermissions($this->input->post('edit_id'), $this->user['user_id']);
+        $edit_id = $this->_verifyPurchasePermissions(hashids_decrypt($this->input->post('edit_id')), $this->user['user_id']);
         if ($edit_id === FALSE) {
           $this->session->set_flashdata('error', 'Edit failed. You do not have permissions to edit this purchase (or it was not found).');
           redirect('purchases');
