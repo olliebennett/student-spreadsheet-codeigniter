@@ -17,11 +17,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>clickAndWait</td>
-	<td>//nav[@id='main']/span[2]/a[2]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>type</td>
 	<td>id=description</td>
 	<td>Test Purchase 1</td>
@@ -61,7 +56,16 @@
 	<td>css=div.alert.alert-success</td>
 	<td>× Purchase added. View it here (or add another).</td>
 </tr>
-
+<tr>
+	<td>assertElementNotPresent</td>
+	<td>css=div.alert.alert-error</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementNotPresent</td>
+	<td>css=div.alert.alert-warn</td>
+	<td></td>
+</tr>
 </tbody></table>
 </body>
 </html>
