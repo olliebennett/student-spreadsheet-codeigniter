@@ -57,7 +57,16 @@
         <div id="stsp_logo">
           <img src="<?php echo base_url(); ?>assets/img/stsp_64.png" alt="#" />
         </div>
-        <h1>Student Spreadsheet</h1>
+        <h1>
+          Student Spreadsheet
+<?php if (ENVIRONMENT == 'demo') : ?>
+          <span class="text-warning">DEMO</span>
+<?php elseif (ENVIRONMENT == 'beta') : ?>
+          <span class="text-warning">BETA</span>
+<?php elseif (ENVIRONMENT == 'development') : ?>
+          <span class="text-warning">DEV</span>
+<?php endif; ?>
+        </h1>
         <div id="user_info">
 <?php if ($this->session->userdata('social_identifier_facebook')) : ?>
           <div id="user_name">
