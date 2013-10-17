@@ -15,6 +15,14 @@ Desktop.ini
 # Mac crap
 .DS_Store
 
+#####################
+# IDE/Editor Config #
+#####################
+
+# Sublime Text Project Files
+*.sublime-project
+*.sublime-workspace
+
 ####################
 # Custom additions #
 ####################
