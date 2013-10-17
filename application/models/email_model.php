@@ -43,10 +43,9 @@ $body = '<html>
 		$this->email->message($body);
 
 		log_message("debug", "Sending message:\r\nSubject: $subject\r\n\r\nBody: $body");
-		return; // TODO
 
 		if($this->email->send()) {
-			log_message('debug', 'Email message sent.';
+			log_message('debug', 'Email message sent.');
 		} else {
 			show_error($this->email->print_debugger());
 		}
