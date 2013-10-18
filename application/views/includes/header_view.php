@@ -9,6 +9,10 @@
   <link href='<?php echo base_url(); ?>assets/lib/bootstrap/css/bootstrap.css' rel="stylesheet">
   <link href="<?php echo base_url(); ?>assets/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 
+<?php if (ENVIRONMENT == 'development' || ENVIRONMENT == 'beta') : ?>
+  <link rel="stylesheet" href="<?php echo base_url(); ?>assets/lib/github-fork-ribbon-css/gh-fork-ribbon.css" />
+<?php endif; ?>
+
   <!--<link href='<?php echo base_url(); ?>assets/css/hauth.css' rel=stylesheet>-->
   <link href='<?php echo base_url(); ?>assets/theme1/style.css' rel="stylesheet">
 
@@ -50,6 +54,15 @@
 </head>
 
 <body>
+
+<?php if (ENVIRONMENT == 'development' || ENVIRONMENT == 'beta') : ?>
+  <!-- GitHub Ribbon -->
+  <div class="github-fork-ribbon-wrapper">
+    <div class="github-fork-ribbon">
+      <a href="https://github.com/olliebennett/student-spreadsheet-codeigniter">Fork me on GitHub</a>
+    </div>
+  </div>
+<?php endif; ?>
 
   <div id="container">
     <header>
