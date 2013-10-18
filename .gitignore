@@ -23,6 +23,13 @@ Desktop.ini
 *.sublime-project
 *.sublime-workspace
 
+#########################
+# Dependency Management #
+#########################
+
+/vendor
+composer.phar
+
 ####################
 # Custom additions #
 ####################

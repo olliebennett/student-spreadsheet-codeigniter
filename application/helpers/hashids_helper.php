@@ -1,7 +1,5 @@
 <?php if(!defined('BASEPATH')) exit('No direct script access allowed');
 
-require APPPATH.'/third_party/hashids/Hashids.php';
-
 /**
  * Create the hashid object using config settings unless override values are passed thru.
  *
