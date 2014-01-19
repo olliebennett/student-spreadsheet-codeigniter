@@ -80,7 +80,7 @@ $autoload['helper'] = array('html','url','misc','hashids');
 |
 */
 
-$autoload['config'] = array('stsp','hashids');
+$autoload['config'] = array('stsp','hashids','analytics');
 
 
 /*

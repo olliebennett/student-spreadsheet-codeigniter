@@ -51,6 +51,10 @@
     Cufon.replace('h1,h2');
   </script>
 
+<?php if ($this->config->item('analytics_enabled')) {
+  echo $this->config->item('analytics_code');
+} ?>
+
 </head>
 
 <body>
