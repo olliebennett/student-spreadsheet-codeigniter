@@ -29,10 +29,10 @@ date_default_timezone_set('UTC');
  * current environment. Setting the environment also influences
  * things like logging and error reporting.
  *
- * This can be set to anything, but default usage is:
+ * This can be set to:
  *
  *     development
- *     testing
+ *     beta
  *     demo
  *     production
  *
@@ -57,7 +57,7 @@ if (defined('ENVIRONMENT'))
 			error_reporting(E_ALL);
 		break;
 	
-		case 'testing':
+		case 'beta':
 		case 'demo':
 		case 'production':
 			error_reporting(0);
