@@ -9,7 +9,7 @@
   <link href='<?php echo base_url(); ?>assets/lib/bootstrap/css/bootstrap.css' rel="stylesheet">
   <link href="<?php echo base_url(); ?>assets/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 
-<?php if (ENVIRONMENT == 'development' || ENVIRONMENT == 'beta') : ?>
+<?php if (ENVIRONMENT == 'development') : ?>
   <link rel="stylesheet" href="<?php echo base_url(); ?>assets/lib/github-fork-ribbon-css/gh-fork-ribbon.css" />
 <?php endif; ?>
 
@@ -59,7 +59,7 @@
 
 <body>
 
-<?php if (ENVIRONMENT == 'development' || ENVIRONMENT == 'beta') : ?>
+<?php if (ENVIRONMENT == 'development') : ?>
   <!-- GitHub Ribbon -->
   <div class="github-fork-ribbon-wrapper">
     <div class="github-fork-ribbon">
