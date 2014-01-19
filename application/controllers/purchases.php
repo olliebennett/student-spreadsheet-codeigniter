@@ -784,6 +784,10 @@ class Purchases extends CI_Controller {
 
       // Add purchase to database
       $purchase_id = $this->purchases_model->addPurchase($this->user['user_id'], $house_id, $data['purchase_details']);
+
+      // Add the ID to this purchase
+      $data['purchase_details']['purchase_id'] = $purchase_id;
+
       // Check for failure adding purchase
       if ($purchase_id != FALSE) {
 
