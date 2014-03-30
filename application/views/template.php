@@ -1,7 +1,7 @@
 <?php $this->load->view('includes/header_view'); ?>
 
 
-<?php if (ENVIRONMENT == 'demo' || ENVIRONMENT == 'testing') : // DEMO or BETA ?>
+<?php if (ENVIRONMENT == 'demo' || ENVIRONMENT == 'beta') : // DEMO or BETA ?>
 
         <div class="alert alert-info">
 <?php if (ENVIRONMENT == 'demo') : ?>

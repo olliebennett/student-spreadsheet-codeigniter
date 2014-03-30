@@ -9,7 +9,7 @@
 <i class="icon-asterisk"></i> Explore the site's features with no hassle!
 </p>
 
-<?php elseif (ENVIRONMENT == 'testing') : ?>
+<?php elseif (ENVIRONMENT == 'beta') : ?>
 
 <p class="text-error">This is the <strong>BETA</strong> version; all data may be deleted at any time.</p>
 
