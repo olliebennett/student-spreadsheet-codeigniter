@@ -110,7 +110,11 @@
         <span class="pull-left"><a href="<?php echo site_url('purchases'); ?>" class="nav<?php echo $this->uri->uri_string() == 'purchases' ? ' nav_current' : ''; ?> nav_pos_left nav_purchases">Purchases</a><a href="<?php echo site_url('purchases/add'); ?>" class="nav<?php echo (($this->uri->uri_string() == 'purchases/add') ? ' nav_current' : '') ?> nav_pos_right nav_add">&nbsp;</a></span>
         <span class="pull-left"><a href="<?php echo site_url('settings'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'settings') ? ' nav_current' : '') ?> nav_settings">Settings</a></span>
 <?php if ($this->session->userdata('social_identifier_facebook')) : ?>
+  <?php if (ENVIRONMENT == 'demo') : ?>
+        <span class="pull-right"><a href="<?php echo "http://studentspreadsheet.com/"; ?>" class="nav nav_logout">End Demo</a></span>
+  <?php else : ?>
         <span class="pull-right"><a href="<?php echo site_url('auth/logout'); ?>" class="nav nav_logout">Logout</a></span>
+  <?php endif; ?>
 <?php else : ?>
         <span class="pull-right"><a href="<?php echo site_url('auth'); ?>" class="nav<?php echo (($this->uri->segment(1) == 'auth') ? ' nav_current' : '') ?> nav_login">Login</a></span>
 <?php endif; ?>
