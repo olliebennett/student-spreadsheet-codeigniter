@@ -30,7 +30,7 @@
 <?php if (ENVIRONMENT == 'demo') : ?>
 <br />Use the navigation links above to explore the demo, or 
 <?php else : ?>
-<a href="http://demo.studentspreadsheet.com/" class="btn btn-inverse">Explore the DEMO</a> 
+<a href="http://demo.studentspreadsheet.com/purchases" class="btn btn-inverse">Explore the DEMO</a> 
 <?php endif; ?>
 <a href="http://studentspreadsheet.com/register" class="btn btn-success">Register!</a>
 </p>
