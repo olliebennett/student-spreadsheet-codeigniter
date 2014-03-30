@@ -1,8 +1,11 @@
 
+  <meta charset="utf-8">
+
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
   <meta property="og:site_name" content="The Student Spreadsheet" />
   <meta property="og:type" content="website" />
-  <!--<meta property="og:image" content="...logo.png" />-->
   <meta property="fb:admins" content="504850777" />
   <!--<meta property="fb:app_id" content="<?php // TODO - echo 'APP_ID'; // TODO ?>" />-->
   <meta name="keywords" content="student spreadsheet university rented house accommodation bills share purchase receipt roommate room mate flat mate" /> 
