@@ -41,7 +41,7 @@ foreach ($housemates as $housemate) {
 <?php foreach ($purchases as $purchase_id => $purchase) : ?>
 	<?php $isNew = (strtotime($purchase['added_time']) > (strtotime('now') - 60*60*2)); ?>
 	<tr class="purchase-overview<?php echo ($purchase['status'] == 'deleted') ? ' error' : ''; ?>">
-		<td><?php echo $purchase['date']; ?></td>
+		<td title="Date of Purchase: <?php echo date("l jS F Y", strtotime($purchase['date'])); ?>"><?php echo date("d/m/y", strtotime($purchase['date'])); ?></td>
 		<td><?php echo ($isNew) ? '<i title="Recently Added" class="icon-star"></i> ' : '' ?><?php echo $purchase['description']; ?></td>
 		<td><?php echo $housemate_name[$purchase['payer']]; ?></td>
 		<td><?php echo render_price($purchase['total_price']); ?></td>
