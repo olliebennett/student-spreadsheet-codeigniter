@@ -9,6 +9,7 @@ The Student Spreadsheet
 * __MySQL__ or other [supported](http://ellislab.com/codeigniter/user-guide/general/requirements.html) database
 * __PHP__ with `curl` and `openssl`
 * [__CodeIgniter__](http://ellislab.com/codeigniter) __v2.x__
+* [__Composer__](http://getcomposer.org/) Dependency Manager
 
 ## Installation / Configuration
 
@@ -16,7 +17,12 @@ Set up your own domain (or make one up and modify your `hosts` file with `127.0.
 
 Create a [Facebook app](https://developers.facebook.com/apps), pointing to your domain.
 
-Settings need updating in the `application/config` folder. Specifically:
+Update the dependencies using Composer (see [these instructions](http://getcomposer.org/doc/00-intro.md) to install)
+
+* `cd student-spreadsheet-codeigniter`
+* `composer update`
+
+Update your settings in the `application/config` folder. Specifically:
 
 ### `config.php`
 
