@@ -30,11 +30,10 @@ class Notifications_model extends CI_Model {
 
     function sendNotification($action, $user, $housemates, $d) {
 
-        //d($action, 'action');
-        //d($user, 'user');
-        //d($housemates, 'housemates');
-        //d($d, 'data');
-        //die();
+        //d_log($action, 'action');
+        //d_log($user, 'user');
+        //d_log($housemates, 'housemates');
+        //d_log($d, 'notification data');
 
         log_message('debug',"sending '$action' notification");
 
@@ -52,6 +51,7 @@ class Notifications_model extends CI_Model {
                 log_message("debug", "Sending email to a housemate!");
 
                 $message = "";
+                $subject = "Notification";
 
                 switch ($action) {
 
@@ -59,6 +59,8 @@ class Notifications_model extends CI_Model {
                         $message .= "<p>A purchase was just added by " . $user['user_name'] . ".</p>";
                         $message .= "<p>" . $d['description'] . "</p>";
                         $message .= "<p>Paid by: " . $housemates[$d['payer']]['user_name'] . " on " . $d['purchase_date'] . "</p>";
+                        $message .= '<p>Click <a href="' . site_url('purchases/view/' . hashids_encrypt($d['purchase_id'])) . '">here</a> to view purchase details, or to leave a comment or dispute.</p>';
+                        $subject = "New Purchase";
                         break;
                     default:
                         log_message("error", "Unhandled action: '" + $action + "'");
@@ -66,7 +68,7 @@ class Notifications_model extends CI_Model {
                 }
 
                 $this->load->model('email_model');
-                $this->email_model->send_email($housemate['user_email'], "New Purchase from STSP", $message);
+                $this->email_model->send_email($housemate['user_email'], $subject, $message);
 
                 if ($housemate['user_id'] == $user['user_id']) {
 

@@ -44,7 +44,13 @@ $body = '<html>
 
 		log_message("debug", "Sending message:\r\nSubject: $subject\r\n\r\nBody: $body");
 
-		if($this->email->send()) {
+		// Disable email sending for DEMO and BETA modes
+		if (ENVIRONMENT == "demo" || ENVIRONMENT == "beta") {
+			log_message('info', 'Email DISABLED in DEMO and BETA modes.');
+			return;
+		}
+
+		if ($this->email->send()) {
 			log_message('debug', 'Email message sent.');
 		} else {
 			show_error($this->email->print_debugger());
